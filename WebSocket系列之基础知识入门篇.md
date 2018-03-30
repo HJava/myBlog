@@ -5,8 +5,6 @@
 本文主要内容如下：
 
 - WebSocket基础概念介绍
-
-
 - WebSocket协议初读
 - WebSocket 相关API浅析
 - WebSocket在线上项目中的使用
@@ -80,8 +78,6 @@ Sec-WebSocket-Version: 13
 
 - `Host: server.example.com`：表示将要连接的WebSocket地址。
 - `Connection: Upgrade`：需要升级HTTP连接。
-
-
 - `Upgrade: websocket`：将HTTP连接升级至WebSocket连接。
 - `Sec-WebSocket-Key:dGhlIHNhbXBsZSBub25jZQ== `：客户端生成的WebSocket连接密钥。
 - `Sec-WebSocket-Protocol: chat, superchat`：指定哪些协议是客户端可以接受的。
@@ -146,7 +142,7 @@ WebSocket可以传递`String`、`ArrayBuffer`和`Blob`三种数据类型，因�
 - 如果是`String`类型，直接通过字符串处理函数即可进行相关转换，如JSON等格式。
 
 
-- 如果是二进制`blob`类型，则需要使用`ArrayBuffer`和`DataView`来进行处理，相关的内容将在本系列第二篇中进行介绍。
+- 如果是二进制`ArrayBuffer`类型，则需要使用`DataView`来进行处理，相关的内容将在本系列第二篇中进行介绍。
 
 ## 发送消息
 
@@ -156,7 +152,7 @@ WebSocket通过`send`方法来发送消息。
 webSocket.send(data);
 ```
 
-示例中的`data`字段，也有可能是收到消息所说的`String`、`ArrayBuffer`和`Blob`三种数据类型之一。
+示例中的`data`字段，也有可能是收到消息所说的`String`、`ArrayBuffer`和`Blob`三种数据类型之一。其中，`Blob`作为一种类文件数据类型，再此不进行过多介绍。我们使用最多的就是`String`和`ArrayBuffer`。
 
 - `String`类型只需要传递一个字符串给`send`方法作为参数即可。
 - `ArrayBuffer`类型则需要传递一个ArrayBuffer对象作为参数，相关的内容也将在本系列第二篇中进行介绍。
