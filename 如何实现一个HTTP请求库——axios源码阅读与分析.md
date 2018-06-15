@@ -150,7 +150,7 @@ axios中XHR模块较为简单，为XMLHTTPRequest对象的封装，我们在这�
 
 ```javascript
 Axios.prototype.request = function request(config) {
-    
+
     // 其他代码
 
     var chain = [dispatchRequest, undefined];
@@ -190,11 +190,11 @@ Axios.prototype.request = function request(config) {
     function Cancel(message) {
       this.message = message;
     }
- 
+
     Cancel.prototype.toString = function toString() {
       return 'Cancel' + (this.message ? ': ' + this.message : '');
     };
- 
+
     Cancel.prototype.__CANCEL__ = true;
 ```
 
@@ -234,6 +234,7 @@ CancelToken.source = function source() {
     };
 };
 ```
+
 而在`adapter/xhr.js`文件中，有与之相对应的取消请求的代码：
 
 ```javascript
@@ -279,5 +280,3 @@ if (config.cancelToken) {
 由于篇幅原因，本文仅针对axios的核心模块进行了分解和介绍，如果对其他代码有兴趣的同学，可以去[GitHub](https://github.com/axios/axios)进行查看。
 
 如果有任何疑问或者观点，欢迎随时留言讨论。
-
-

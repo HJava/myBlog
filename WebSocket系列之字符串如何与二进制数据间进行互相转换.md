@@ -124,3 +124,4 @@ let strResult = result.reduce((prev, next)=>{
 通过使用ArrayBuffer和DataView，我们能够在string数据和二进制数据中进行互相转换。
 有了string类型转换的相关基础，读者就能够在之后的WebSocket进行二进制数据传递时理解相关的内容和处理逻辑。
 下一篇WebSocket系列相关的博客，将会介绍如何通过WebSocket来向后端传递二进制数据，以及如何处理通过WebSocket收到的二进制数据。有兴趣的同学可以继续关注。
+
