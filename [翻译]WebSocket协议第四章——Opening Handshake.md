@@ -1,6 +1,6 @@
 # 概述
 
-本文为WebSocket协议的第四章，本文翻译的主要内容为WebSocket建立连接开始握手的内容。
+本文为WebSocket协议的第四章，本文翻译的主要内容为WebSocket建立连接开始握手的内容，主要包含了客户端和服务端握手的内容，以及双方如何处理相关字段和逻辑。
 
 # 4 开始握手（协议正文）
 
@@ -99,3 +99,154 @@
 服务端可以将连接的管理挂载到其他的网络代理赏，如负载均衡器或者反向代理。在这种情况下，这篇规范对于服务端的目标是包含从第一个设备从建立到断开连接的TCP连接周期到服务端接受请求，发送响应的所有服务测的基础设施部分。
 
 示例：一个数据中心可能有一个响应WebSocket握手请求的服务器，但是它将收到的数据帧都通过连接传递给另一个服务器来处理。在本文档中，"服务端（server）"包含这两者。
+
+### 4.2.1 解析客户端的握手协议
+
+当客户端开始一个WebSocket连接时，他会发送一个开始握手协议。为了获得必要的信息来保证服务端的握手响应，服务端必须解析这个客户端这部分的握手协议。
+
+客户端的握手协议包含以下几部分。当服务的收到一个握手请求，发现客户端并没有发送一个符合以下内容的握手协议（注意在[RFC2616](https://tools.ietf.org/html/rfc2616)中的每一项，header字段的顺序是不重要的），包括但不限于在握手协议中有不合法的ANBF语法，服务端必须立即停止处理客户端的握手请求并且在响应中返回一个表示错误的HTTP错误码（如400 Bad Request）。
+
+1. 一个HTTP/1.1或者跟高版本的GET请求，包含一个在第三章定义的应该被解析为资源名称（resource name）"Request-URI"字段（或者包含资源名称（resource name）的HTTP/HTTPS绝对路径）。
+2. 包含服务端权限的`Host`header字段。
+3. 不区分大小写的值为"websocket"的`Upgrade`header字段。
+4. 不区分大小写的值为"Upgrade"的`Connection`header字段。
+5. 值为base64编码（见[RFC4648的第四章](https://tools.ietf.org/html/rfc4648#section-4)）后长度为16字节的`Sec-WebSocket-Key`header字段。
+6. 值为13的`Sec-WebSocket-Version`header值。
+7. 可选的`Origin`header字段。所有的浏览器都会发送这个字段。缺少此字段的连接不应该认为是来自浏览器。
+8. 可选的`Sec-WebSocket-Protocol`header字段，对应的值为客户端支持的子协议，根据权重进行排序。
+9. 可选的`Sec-WebSocket-Extensions`header字段，对应的值为客户端可以使用的扩展。这个字段具体内容会在第9.1节再进行讨论。
+10. 可选的其他字段，如使用cookie或者服务器请求认证的字段。不识别的header字段会依据[RFC2616](https://tools.ietf.org/html/rfc2616)中内容被忽略。
+
+### 4.2.2 发送服务端握手响应请求
+
+当客户端和服务端建立了一个WebSocket连接，服务端也必须完成接受连接的下面说明的步骤，并且发送一个服务端握手响应。
+
+1. 如果是一条建立在HTTPS（HTTPS+TLS）端口的连接，通过这个链接完成TLS握手过程。如果这次握手失败（例如，客户端在"server_name"扩展中制定了主机名，但是服务端没有这个主机），那么关闭这条连接；否则，后续这个连接的所有的数据传递（包括服务端握手响应）都必须使用一个加密的通道。
+2. 服务端可以选择而外面的客户端认证，例如，通过返回401状态码和在[RFC2616](https://tools.ietf.org/html/rfc2616)说明的相对应的`WWW-Authenticate`header字段。
+3. 服务端可能通过使用3xx的状态码（见[RFC2616](https://tools.ietf.org/html/rfc2616)）来重定向客户端。注意这个步骤可以发生在上面说到的认证之前、之后或者和认证一起。
+4. 构造以下信息：
+ 
+    源（`origin`）
+
+    `Origin`header字段在客户端的握手请求中表示建立连接的脚本属于哪一个源。这个源信息被序列化为ASCII，并且转换为小写。服务端可以使用这个信息来作为判断是否接受这个链接的部分参考内容。如果服务端没有过滤源，那么他会接受任意源的连接。如果服务端没有接受这个连接，那么它必须返回一个对应的HTTP错误码（如403 Forbidden）并且终端这一节描述的WebSocket握手过程。更多详情可以阅读第十章。
+    
+    关键值（`key`）
+    
+    `Sec-WebSocket-Key`header字段在客户端的握手请求中表示一个长度为16字节的base64编码的值。这个编码后的值是用于服务端握手的创建过程，用来表示接受了这个连接。服务端没有必要对`Sec-WebSocket-Key`值进行解码。
+    版本（`version`）
+    `Sec-WebSocket-Version`header字段在客户端握手请求中表示了客户端建立连接使用的WebSocket协议版本。如果这个版本和服务端的版本没有匹配上，那么服务端必须中断本章说的WebSocket连接，并且发送一个对应的HTTP错误码（例如426 Upgrade Required），同时返回一个`Sec-WebSocket-Version`header字段用来标识服务端能够识别的版本号。
+    
+    资源名称（`resource name`）
+    
+    服务端提供的服务标识符。如果这个服务端提供多种服务，那么这个值应该是来自客户端握手请求中的GET方法中的"Request-URI"字段。如果请求的服务支持，那么服务端必须发送一个相对应的HTTP错误码（例如404 Not Found）并且终端WebSocket连接。
+    子协议（`subprotocol`）
+    服务端准备使用的代表子协议的单个值或者为空。这个值必须选择客户端握手协议中由`Sec-WebSocket-Protocol`字段中提供的值，服务端会在这个连接中使用此值（任意）。如果客户端握手协议中没有包含这个字段或者服务端不支持客户端请求中提供的任意一个子协议，那么这个值只能为空。没有此header值就表明该值为空（这意味着服务端可以不选择客户端传递的任意一个子协议，禁止在响应请求中添加一个`Sec-WebSocket-Protocol`字段）。空字符串与空值不同，并且空值对于此字段来说是一个不合法值。ABNF对于整个字段的定义和构造规则可以见[RFC2616](https://tools.ietf.org/html/rfc2616)。
+    
+    扩展（`extensions`）
+    
+    表示一个服务端准备使用的协议级扩展列表（可能为空）。如果服务端支持多种扩展，那么这个值必须是客户端握手中已有的数值，是从`Sec-WebSocket-Extensions`字段中取一到多个值。该字段不存在时则表示此值为空。空字符串与空值不同。客户端没有列举的扩展静止被
+    使用。应该选择哪些值和如何进行解析可以见9.1节。
+
+5. 如果服务端选择接受一条连接，他必须发送一个如下说明的有效的HTTP请求来进行相应。
+    1. 像[RFC2616](https://tools.ietf.org/html/rfc2616)中说明的一样，状态码为101的状态行。比如看上去像这种的："HTTP/1.1 101 Switching Protocols"。
+    2. 像[RFC2616](https://tools.ietf.org/html/rfc2616)中说明的一样，值为"websocket"的`Upgrade`header字段。
+    3. 值为"Upgrade"的`Connection`header字段。
+    4. 一个`Sec-WebSocket-Accept`header字段。这个值由第4.2.2节的第4步提到的key来进行构造，通过和字符串"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"拼接在一起进行SHA-1哈希运算，得到一个20字节的值，然后对这20字节进行base64编码。
+    ABNF对这个字段定义如下：
+
+    ```
+    Sec-WebSocket-Accept = base64-value-non-empty
+    base64-value-non-empty = (1*base64-data [ base64-padding ]) | base64-padding
+    base64-data = 4base64-character
+    base64-padding = (2base64-character "==") | (3base64-character "=")
+    base64-character = ALPHA | DIGIT | "+" | "/"
+    ```
+    
+    注意：作为示例，如果客户端握手时发送的`Sec-WebSocket-Key`header字段的值为"dGhlIHNhbXBsZSBub25jZQ=="，那么服务端会把"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"拼接到后面得到"dGhlIHNhbXBsZSBub25jZQ==258EAFA5-E914-47DA-95CA-C5AB0DC85B11"。然后服务端回对这个字符串进行SHA-1哈希操作，得到0xb3 0x7a 0x4f 0x2c 0xc0 0x62 0x4f 0x16 0x90 0xf6 0x46 0x06 0xcf 0x38 0x59 0x45 0xb2 0xbe 0xc4 0xea。对这个值进行base64编码，得到结果为"s3pPLMBiTxaQ9kYGzzhZRbK+xOo="，然后通过`Sec-WebSocket-Accept`字段返回这个结果。
+    5. 可选的`Sec-WebSocket-Protocol`字段，值为定义在第4.2.2节第4点中的子协议中。
+    6. 可选的`Sec-WebSocket-Extensions`字段，值为定义在4.2.2节第4点中的扩展中。
+
+这样服务端握手响应就完成了。如果服务端完成了上述步骤时也没有关闭中断WebSocket连接，那么服务端回考虑建立这个WebSocket链接并且将WebSocket连接状态置为`OPEN`。在此刻，服务端就可以开始发送（和接收）数据了。
+
+## 4.3 收集握手中使用的新的ABNF的header字段
+
+这一节使用在[RFC2616第2.1节](https://tools.ietf.org/html/rfc2616#section-2.1)定义的ABNF语法和规则，包括隐含的*LWS规则（implied *LWS rule）。
+
+请注意本节中使用了一下ABNF规定。一些规则名称对应一些header字段。这样的规则表示对应的header字段的值，例如`Sec-WebSocket-Key`的ABNF描述了`Sec-WebSocket-Key`header字段的值的语法。在名字中带有"-Client"后缀的ABNF规则只适用于客户端发送给服务端的请求；而名字中带有"-Server"后缀的ABNF规则则只适用于服务端给客户端发送的请求响应。例如ABNF规则`Sec-WebSocket-Protocol-Client`表示客户端发送给服务端的请求中的`Sec-WebSocket-Protocol`字段的值。
+
+以下的新的header字段可以在客户端向服务端发送握手请求时使用：
+
+```
+Sec-WebSocket-Key = base64-value-non-empty
+Sec-WebSocket-Extensions = extension-list
+Sec-WebSocket-Protocol-Client = 1#token
+Sec-WebSocket-Version-Client = version
+
+base64-value-non-empty = (1*base64-data [ base64-padding ]) | base64-padding
+base64-data = 4base64-character
+base64-padding = (2base64-character "==") | (3base64-character "=")
+base64-character = ALPHA | DIGIT | "+" | "/"
+extension-list = 1#extension
+extension = extension-token *( ";" extension-param )
+extension-token = registered-token
+registered-token = token
+extension-param = token [ "=" (token | quoted-string) ]
+    ;当使用带引号的字符串语法变体时，在引号转义后面的值必须和ABNF"标记（token）"一致。
+NZDIGIT =  "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+version = DIGIT | (NZDIGIT DIGIT) | ("1" DIGIT DIGIT) | ("2" DIGIT DIGIT)
+    ; 范围是从0-255，没有前导0
+```
+
+以下的新的header字段可以在服务端向客户端发送握手响应请求时使用：
+
+```
+Sec-WebSocket-Extensions = extension-list
+Sec-WebSocket-Accept = base64-value-non-empty
+Sec-WebSocket-Protocol-Server = token
+Sec-WebSocket-Version-Server = 1#version
+```
+
+## 4.4 支持多版本WebSocket协议
+
+这一节提供了一些关于在客户端和服务端间支持多版本的WebSocket的协议的指导。
+
+使用WebSocket版本标记字段（`Sec-WebSocket-Version`header字段），客户端可以在最初请求时选择WebSocket协议的版本号（客户端不必要支持最新的版本）。如果服务端支持请求的版本并且我收到消息是有效的，那么服务端会接受这个版本。如果服务端不支持客户端请求的版本，那么服务端必须返回一个`Sec-WebSocket-Version`header字段（或者多个`Sec-WebSocket-Version`header字段）包含服务端支持的所有版本。在这种情况下，如果客户端支持其中任意一个版本，它可以选择一个新的版本值重新发起握手请求。
+
+下面的示例演示了如何进行上面所述的版本协商：
+
+```
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+...
+Sec-WebSocket-Version: 25
+```
+
+服务端的响应可能如下所示：
+
+```
+HTTP/1.1 400 Bad Request
+...
+Sec-WebSocket-Version: 13, 8, 7
+```
+
+注意服务端发送的最后的请求响应也可能是这个样子：
+
+```
+HTTP/1.1 400 Bad Request
+...
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Version: 8, 7
+```
+
+客户端选择了版本13，重新进行握手：
+
+```
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+...
+Sec-WebSocket-Version: 13
+```

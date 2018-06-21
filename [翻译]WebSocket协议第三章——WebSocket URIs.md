@@ -27,4 +27,4 @@ query = <query, defined in [RFC3986](https://tools.ietf.org/html/rfc3986#section
 - "?"，表示非空的查询参数（query）
 - 空查询参数（query）
 
-在WebSocket URIs的里，身份标识片段是没有意义的，而且禁止实用在这些URI里面。与任何的URI方案一样，"#"字符不是表示片段（fragment）开始时，都必须编码为`%23`。
+在WebSocket URIs的里，身份标识片段是没有意义的，而且禁止使用在这些URI里面。与任何的URI方案一样，"#"字符不是表示片段（fragment）开始时，都必须编码为`%23`。
