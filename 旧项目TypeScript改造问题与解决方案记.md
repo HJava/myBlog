@@ -224,6 +224,79 @@ interface Props<T extends string | number> {
 
 此时，当value的类型确定时，参数的类型也就变得和value一样确定了。
 
+## 模块引用
+
+当我们使用TypeScript时，经常会出现引用其他模块甚至是JavaScript其他包的情况。在TypeScript中，有多重不同的导出方式，不同的导出方式也对应着不同的引用方式。
+
+目前我在项目改造中，遇到的模块有这么几种方式：
+
+1. CMD规范。
+2. ES2015 Module规范。
+
+而对于这几种模块，我们也有不同的导入方式：
+
+```typescript
+import _assign = require('lodash.assign'); //CMD规范
+import constant from './constant'; // ES2015 Module规范
+```
+
+如果你引入的文件是一个非TypeScript而是JavaScript文件时，你可能还需要增加声明文件。我们可以通过如下方法来添加声明文件：
+
+1. 增加@types文件。这个方式针对于一些比较出名的类库可以使用此方法。
+
+2. 在.d.ts文件中增加声明，这个声明全局有效。具体方式如下：
+
+   ```typescript
+   declare module 'promiz';
+   ```
+
+   对于JSON文件，你也需要采用这种声明方式，具体方式如下：
+
+   ```typescript
+   declare module "*.json" {
+       const value: any;
+       export const version: string;
+       export default value;
+   }
+   ```
+
+通过以上方法，我们就可以应对不同模块的规范和不同类型的文件。
+
+## TypeScript局部替换
+
+在进行重构改造的时候，我们在最开始可能只能逐个模块进行替换。我们需要新的TypeScript文件和旧的JavaScript文件能够和平共存进行编译运行。
+
+针对这种需求，我们只需要在webpack编译的loader中增加相关ts文件的配置，并且在extension中增加`.ts`后缀的支持。相关配置如下：
+
+```json
+{
+    module: {
+        rules: [
+            {
+                test: /ts$/,
+                use: [{
+                    loader: 'ts-loader',
+                    options: {
+                        silent: process.env.env === 'production' ? true : false
+                    }
+                }]
+            }
+        ]
+    },
+    extensions: ['.ts', '.js']
+}
+```
+
+然后，我们只需要在JavaScript中文件引入时，带上`.ts`后缀即可，如下例所示：
+
+```javascript
+// 本人之前使用的是CMD规范，因此引入ES2015模块需要访问default
+var EventEmitter = require('eventemitter3');
+var Session = require('./session.ts').default;
+```
+
+这样，我们就可以逐步的进行模块替换和改造，而不需要进行大规模的文件替换和改名。
+
 # 总结
 
 在做项目TypeScript改造的过程中，遇到了不少大大小小的坑。很多问题在网上都没有解决方案或者没有说明白具体的解决步骤，因此希望通过这一篇文章来帮助大家在进行TypeScript迁移时避免在我踩过的坑上再浪费时间。
