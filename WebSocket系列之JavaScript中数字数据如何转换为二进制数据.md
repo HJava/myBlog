@@ -69,7 +69,7 @@ buffer.byteLength; // 结果为8
 本章，我以Short类型和Int类型为例，介绍下相关操作步骤。
 
 ```javascript
-let buffer = new ArrayBuffer(6); // 初始化3个Byte的二进制数据缓冲区
+let buffer = new ArrayBuffer(6); // 初始化6个Byte的二进制数据缓冲区
 let dataView = new DataView(buffer);
 
 dataView.setInt16(0, 3); // 从第0个Byte位置开始，放置一个数字为3的Short类型数据(占2 Byte)
@@ -108,7 +108,7 @@ dataView.setInt32(4, long.low);
 ```javascript
 import Long from 'long';
 
-let buffer = new ArrayBuffer(14); // 初始化3个Byte的二进制数据缓冲区
+let buffer = new ArrayBuffer(14); // 初始化14个Byte的二进制数据缓冲区
 let dataView = new DataView(buffer);
 let long = Long.fromString('123');
 
