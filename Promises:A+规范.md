@@ -50,7 +50,7 @@
 
 2.1.3. 当处于rejected状态时，promise：
 
-2.1.3.1. 禁止装好成其他状态。
+2.1.3.1. 禁止转换成其他状态。
 
 2.1.3.2. 必须有一个无法更改的原因。
 
@@ -98,7 +98,7 @@ promise.then(onFulfilled, onRejected)
 
 2.2.6.2. 如果`promise`到了rejected状态，那么所有的`onRejected`回调函数都必须按照他们原有的顺序进行调用执行。
 
-2.2.7. `then`犯法必须返回一个promise：
+2.2.7. `then`方法必须返回一个promise：
 
 ```javascript
 promise2 = promise1.then(onFulfilled, onRejected);
