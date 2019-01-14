@@ -16,9 +16,9 @@
 
 ## 2.1 术语和其他公约
 
-\_ASCII\_表示定义在[ANSI.X3-4.1986](https://tools.ietf.org/html/rfc6455#ref-ANSI.X3-4.1986)的字符编码表。
+\_ASCII\_表示定义在[ANSI.X3-4.1986][1]的字符编码表。
 
-这个文档参考UTF-8的值，使用在STD 63（[RFX3629](https://tools.ietf.org/html/rfc3629)）定义的UTF-8标准格式。
+这个文档参考UTF-8的值，使用在STD 63（[RFX3629][2]）定义的UTF-8标准格式。
 
 如命名算法或者定义关键输入的标识如\_this\_。
 
@@ -30,10 +30,15 @@
 
 不区分ASCII大小写（\_ASCII case-insensitive\_）比较方式意味着通过码点（code point）比较这两个字符，如果这两个字符是U+0041到U+005A（拉丁字母大写A到Z）和相对应的U+0061到U+007A的字符（拉丁字母小写A-Z），那么也认为这两个字符相等。
 
-文档中`URI`这个词被定sj义在了[RFC3986](https://tools.ietf.org/html/rfc3986)。
+文档中`URI`这个词被定sj义在了[RFC3986][3]。
 
 当需要实现WebSocket协议中一部分的\_send\_数据时，这个实现是有可能会延迟任意时间来进行数据传输的，例如，使用数据缓冲区来保证发送较少的IP数据包。
 
-这个文档在不同的章节会同时使用[RFC5234](https://tools.ietf.org/html/rfc5234)和[RFC2616](https://tools.ietf.org/html/rfc2616)这两个中的扩充巴科斯-瑙尔范式（ABNF）。
+这个文档在不同的章节会同时使用[RFC5234][4]和[RFC2616][5]这两个中的扩充巴科斯-瑙尔范式（ABNF）。
 
 
+[1]:	https://tools.ietf.org/html/rfc6455#ref-ANSI.X3-4.1986
+[2]:	https://tools.ietf.org/html/rfc3629
+[3]:	https://tools.ietf.org/html/rfc3986
+[4]:	https://tools.ietf.org/html/rfc5234
+[5]:	https://tools.ietf.org/html/rfc2616

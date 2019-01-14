@@ -110,7 +110,7 @@ promise2 = promise1.then(onFulfilled, onRejected);
 
 2.2.7.3. 如果`onFulfilled`不是一个函数并且`promise1`到了fulfilled状态，那么`promise2`必须在与`promise1`的值相同的情况下转换到fulfilled状态。
 
-2.2.7.3. 如果`onRejected`不是一个函数并且`promise1`到了rejected状态，那么`promise2`必须在与`promise1`的原因相同的情况下转换到rejected状态。
+2.2.7.4. 如果`onRejected`不是一个函数并且`promise1`到了rejected状态，那么`promise2`必须在与`promise1`的原因相同的情况下转换到rejected状态。
 
 ## 2.3. promise解析函数
 

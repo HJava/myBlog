@@ -10,7 +10,7 @@
 
 此章节为非规范章节。
 
-在历史上，创建一个客户端和服务端的双向数据Web应用（例如IM应用和游戏应用）需要向服务端频繁发送不同于一般[HTTP请求](https://tools.ietf.org/html/rfc6202)的HTTP轮询请求来从服务端上游更新数据。
+在历史上，创建一个客户端和服务端的双向数据Web应用（例如IM应用和游戏应用）需要向服务端频繁发送不同于一般[HTTP请求][1]的HTTP轮询请求来从服务端上游更新数据。
 
 这个方法有许多的问题：
 
@@ -18,11 +18,11 @@
 - 应用层无线传输协议（HTTP）开销较大，每一个客户端到服务端的消息都有一个HTTP头。
 - 客户端脚本必须包含一个发送和接收对应的映射表来进行对应数据处理。
 
-一个简单的解决方案是使用一个简单的TCP链接来进行双向数据传输。这就是WebSocket提供的能力。结合WebSocket的[API](https://tools.ietf.org/html/rfc6455#ref-WSAPI)，它能够提供一个可以替代HTTP轮询的方法来满足Web页面和远端服务器的双向数据通信。
+一个简单的解决方案是使用一个简单的TCP链接来进行双向数据传输。这就是WebSocket提供的能力。结合WebSocket的[API][2]，它能够提供一个可以替代HTTP轮询的方法来满足Web页面和远端服务器的双向数据通信。
 
 相同的技术可以被用到许多的Web应用：游戏、股票应用、多人协作应用、与后端服务实时交互的用户接口等。
 
-WebSocket协议设计的原因是取代已经存在的使用HTTP作为传输层的双向通信技术，从而使得已经存在的基础服务（如代理、过滤器、认证服务）能够受益。这种技术是基于效率和可靠性权衡后来进行实现的，而HTTP协议最初也[不是用来做双向数据通信的](https://tools.ietf.org/html/rfc6202)。WebSocket协议尝试实现基于现有的HTTP基础服务来实现在现有环境中双向通信技术的目标；所以，即使这意味着在现有环境中会有一些复杂性，它在设计中仍然使用了HTTP的80和443端口，以及支持支持HTTP代理。然而，这个设计并没有限制WebSocket只能使用HTTP端口，在以后的实现中也可以使用一个简单的握手方式来使用特定的端口而不需要改动整个协议。最后一点很重要，因为双向消息的通信方式不是很符合标准HTTP的模式，可能导致在某些组件中出现异常的负载。
+WebSocket协议设计的原因是取代已经存在的使用HTTP作为传输层的双向通信技术，从而使得已经存在的基础服务（如代理、过滤器、认证服务）能够受益。这种技术是基于效率和可靠性权衡后来进行实现的，而HTTP协议最初也[不是用来做双向数据通信的][3]。WebSocket协议尝试实现基于现有的HTTP基础服务来实现在现有环境中双向通信技术的目标；所以，即使这意味着在现有环境中会有一些复杂性，它在设计中仍然使用了HTTP的80和443端口，以及支持支持HTTP代理。然而，这个设计并没有限制WebSocket只能使用HTTP端口，在以后的实现中也可以使用一个简单的握手方式来使用特定的端口而不需要改动整个协议。最后一点很重要，因为双向消息的通信方式不是很符合标准HTTP的模式，可能导致在某些组件中出现异常的负载。
 
 ## 1.2 协议概览
 
@@ -57,9 +57,9 @@ Sec-WebSocket-Protocol: chat
 
 服务端的第一行（leading line）遵循了HTTP状态行的格式。
 
-HTTP请求行和状态行的规范定义在[RFC2616](https://tools.ietf.org/html/rfc2616)。
+HTTP请求行和状态行的规范定义在[RFC2616][4]。
 
-在两个协议中，第一行header下面是一组无序的header字段。这些header字段包含的内容在本文的[第四节](https://tools.ietf.org/html/rfc6455#section-4)。另外的header字段如[cookies](https://tools.ietf.org/html/rfc6265)，也有可能存在。格式和解析头信息被定义在了[RFC2616](https://tools.ietf.org/html/rfc2616)。
+在两个协议中，第一行header下面是一组无序的header字段。这些header字段包含的内容在本文的[第四节][5]。另外的header字段如[cookies][6]，也有可能存在。格式和解析头信息被定义在了[RFC2616][7]。
 
 当客户端和服务端都发送了他们的握手协议，并且当握手已经成功，那么数据传输就开始了。这是一个双方都可以独立发送任意数据的双向通信渠道。
 
@@ -85,7 +85,7 @@ Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 13
 ```
 
-遵照[RFC2616](https://tools.ietf.org/html/rfc2616)，客户端在握手过程中发送的header字段可能是乱序的，所以收到的header字段的顺序不同也没有太大影响。
+遵照[RFC2616][8]，客户端在握手过程中发送的header字段可能是乱序的，所以收到的header字段的顺序不同也没有太大影响。
 
 GET方法的请求URI（Request-URI）是用于定义WebSocket连接的终端，允许同一个IP对多个域名提供服务，也允许多个WebSocket终端连接同一个服务器。
 
@@ -97,7 +97,7 @@ GET方法的请求URI（Request-URI）是用于定义WebSocket连接的终端，
 Sec-WebSocket-Protocol: chat
 ```
 
-服务端也可以设置cookie相关字段来设置cookie相关属性，具体文档见[RFC6265](https://tools.ietf.org/html/rfc6265)。
+服务端也可以设置cookie相关字段来设置cookie相关属性，具体文档见[RFC6265][9]。
 
 ## 1.4 结束握手
 
@@ -138,7 +138,7 @@ WebSocket协议设计的原理就是设计为最的小框架（唯一的约束�
 
 当WebSocket协议在web网页中应用时，WebSocket协议在Web页面与WebSocket服务器建立连接时使用基于web浏览器的同源策略模型。所以说，当WebSocket协议在一个特定的客户端（不是web浏览器里面的网页）直接使用时，同源策略模型就不生效了，客户端可以接受任意的源数据。
 
-该协议无法与已经存在的如SMTP（[RFC5421](https://tools.ietf.org/html/rfc5321)）和HTTP协议的服务器建立连接，如果需要的话，HTTP服务器可以选择支持该协议。该协议还实现了严格约束的握手过程和限制数据不能在握手完成和建立连接之前插入数据进行传输（因此限制了许多被影响的服务器）。
+该协议无法与已经存在的如SMTP（[RFC5421][10]）和HTTP协议的服务器建立连接，如果需要的话，HTTP服务器可以选择支持该协议。该协议还实现了严格约束的握手过程和限制数据不能在握手完成和建立连接之前插入数据进行传输（因此限制了许多被影响的服务器）。
 
 WebSocket服务器同样无法与其他协议尤其是HTTP建立连接。例如，一个HTML“表单”可能会提交给一个WebSocket服务器。WebSocket服务端只能读取包含特定的由WebSocket客户端发送的字段的握手数据。尤其是在编写这个规范时，攻击者不能只使用HTML和JavaScript APIs的Web浏览器来发送以`Sec-`开头的字段。
 
@@ -148,7 +148,7 @@ WebSocket服务器同样无法与其他协议尤其是HTTP建立连接。例如�
 
 WebSocket协议是独立的基于TCP的协议。他和HTTP的唯一关系是建立连接的握手操作的升级请求是基于HTTP服务器的。
 
-WebSocket默认使用80端口进行连接，而基于TLS（[RFC2818](https://tools.ietf.org/html/rfc2818)）的WebSocket连接是基于443端口的。
+WebSocket默认使用80端口进行连接，而基于TLS（[RFC2818][11]）的WebSocket连接是基于443端口的。
 
 ## 1.8 建立连接
 
@@ -160,7 +160,7 @@ WebSocket默认使用80端口进行连接，而基于TLS（[RFC2818](https://too
 
 客户端可以通过在握手阶段中的`Sec-WebSocket-protocol`字段来请求服务端使用指定的子协议。如果指定了这个字段，服务器需要包含相同的字段，并且从子协议的之中选择一个值作为建立连接的响应。
 
-子协议的名称可以按照[第11.5节](https://tools.ietf.org/html/rfc6455#section-11.5)的方法进行注册。为了避免潜在的冲突，推荐使用包含ASCII码的域名名称作为子协议名。例如，Example Corporation创造了在Web上通过多个服务器实现的一个聊天子协议（Chat subprotocol），他们可以叫做`chat.example.com`。如果Example Organization创造了他们相对的子协议叫做`chat.example.org`，这两个子协议可以被服务器同时实现，服务器可以根据客户端来动态的选择使用哪一个子协议。
+子协议的名称可以按照[第11.5节][12]的方法进行注册。为了避免潜在的冲突，推荐使用包含ASCII码的域名名称作为子协议名。例如，Example Corporation创造了在Web上通过多个服务器实现的一个聊天子协议（Chat subprotocol），他们可以叫做`chat.example.com`。如果Example Organization创造了他们相对的子协议叫做`chat.example.org`，这两个子协议可以被服务器同时实现，服务器可以根据客户端来动态的选择使用哪一个子协议。
 
 子协议也可以通过修改名字的方式来向后兼容，例如：将`bookings.example.net`改为`v2.bookings.example.net`。WebSocket客户端能够完全的区分这些子协议。向后兼容的版本控制可以通过复用相同的子协议字符和小心设计的子协议实现来保证这种扩展性。
 
@@ -173,3 +173,15 @@ WebSocket默认使用80端口进行连接，而基于TLS（[RFC2818](https://too
 
 
 
+[1]:	https://tools.ietf.org/html/rfc6202
+[2]:	https://tools.ietf.org/html/rfc6455#ref-WSAPI
+[3]:	https://tools.ietf.org/html/rfc6202
+[4]:	https://tools.ietf.org/html/rfc2616
+[5]:	https://tools.ietf.org/html/rfc6455#section-4
+[6]:	https://tools.ietf.org/html/rfc6265
+[7]:	https://tools.ietf.org/html/rfc2616
+[8]:	https://tools.ietf.org/html/rfc2616
+[9]:	https://tools.ietf.org/html/rfc6265
+[10]:	https://tools.ietf.org/html/rfc5321
+[11]:	https://tools.ietf.org/html/rfc2818
+[12]:	https://tools.ietf.org/html/rfc6455#section-11.5
