@@ -18,7 +18,7 @@
 
 下面，我们通过一张图来了解下，IndexedDB整体的结构。
 
-![clipboard.png](https://segmentfault.com/img/bV4R5H)
+![][image-1]
 
 类比`sql`型数据库，`IndexedDB`中的DB（数据库）就是`sql`中的DB，而`Object Store(存储空间)`则是`数据表`,`Item`则等于表中的一条`记录`。
 
@@ -177,7 +177,7 @@ request.onsuccess = function (event) {
 
 #### 通过游标获取数据
 
-当你需要便利整个存储空间中的数据时，你就需要使用到游标。游标使用方法如下：
+当你需要遍历整个存储空间中的数据时，你就需要使用到游标。游标使用方法如下：
 
 ```javascript
 var request = window.indexedDB.open('test', 1);
@@ -206,7 +206,7 @@ request.onsuccess = function (event) {
 }
 ```
 
-使用游标时有一个需要注意的地方，当游标便利整个存储空间但是并未找到给定条件的值时，仍然会触发`onsuccess`函数。
+使用游标时有一个需要注意的地方，当游标遍历整个存储空间但是并未找到给定条件的值时，仍然会触发`onsuccess`函数。
 
 `openCursor`和`openKeyCursor`有两个参数：
 
@@ -214,34 +214,34 @@ request.onsuccess = function (event) {
 
    遍历范围参数具体示例如下：
 
-   ```javascript
-   // 匹配值 key === 1
-   const singleKeyRange = IDBKeyRange.only(1);
+```javascript
+// 匹配值 key === 1
+const singleKeyRange = IDBKeyRange.only(1);
 
-   // 匹配值 key >= 1
-   const lowerBoundKeyRange = IDBKeyRange.lowerBound(1);
+// 匹配值 key >= 1
+const lowerBoundKeyRange = IDBKeyRange.lowerBound(1);
 
-   // 匹配值 key > 1
-   const lowerBoundOpenKeyRange = IDBKeyRange.lowerBound(1, true);
+// 匹配值 key > 1
+const lowerBoundOpenKeyRange = IDBKeyRange.lowerBound(1, true);
 
-   // 匹配值 key < 2
-   const upperBoundOpenKeyRange = IDBKeyRange.upperBound(2, true);
+// 匹配值 key < 2
+const upperBoundOpenKeyRange = IDBKeyRange.upperBound(2, true);
 
-   // 匹配值 key >= 1 && key < 2
-   const boundKeyRange = IDBKeyRange.bound(1, 2, false, true);
+// 匹配值 key >= 1 && key < 2
+const boundKeyRange = IDBKeyRange.bound(1, 2, false, true);
 
-   index.openCursor(boundKeyRange).onsuccess = function(event) {
-     const cursor = event.target.result;
-     if (cursor) {
-       // Do something with the matches.
-       cursor.continue();
-     }
-   };
-   ```
+index.openCursor(boundKeyRange).onsuccess = function(event) {
+  const cursor = event.target.result;
+  if (cursor) {
+    // Do something with the matches.
+    cursor.continue();
+  }
+};
+```
 
    ​
 
-2. 第二个参数，便利顺序，指定游标便利时的顺序和处理相同id（keyPath属性指定字段）重复时的处理方法。改范围通过特定的字符串（`IDBCursor`的常量已经弃用）来获取。其中：
+2. 第二个参数，遍历顺序，指定游标遍历时的顺序和处理相同id（keyPath属性指定字段）重复时的处理方法。改范围通过特定的字符串（`IDBCursor`的常量已经弃用）来获取。其中：
 
    - `next`，从前往后获取所有数据（包括重复数据）
    - `prev`，从后往前获取所有数据（包括重复数据）
@@ -250,33 +250,33 @@ request.onsuccess = function (event) {
 
    遍历顺序参数具体示例如下：
 
-   ```javascript
-   var request = window.indexedDB.open('test', 1);
+```javascript
+var request = window.indexedDB.open('test', 1);
 
-   request.onsuccess = function (event) {
-       var db = event.target.result;
+request.onsuccess = function (event) {
+    var db = event.target.result;
 
-       var transaction = db.transaction(['table1'], 'readwrite');
+    var transaction = db.transaction(['table1'], 'readwrite');
 
-       var objectStore = transaction.objectStore('table1');
+    var objectStore = transaction.objectStore('table1');
 
-       var lowerBoundOpenKeyRange = IDBKeyRange.lowerBound(1, false);
-       var request = objectStore.openCursor(lowerBoundOpenKeyRange, IDBCursor.PREV);
+    var lowerBoundOpenKeyRange = IDBKeyRange.lowerBound(1, false);
+    var request = objectStore.openCursor(lowerBoundOpenKeyRange, IDBCursor.PREV);
 
-       request.onsuccess = function (event) {
-           var cursor = event.target.result;
-           if (cursor) {
-               // 使用Object.assign方法是为了避免控制台打印时出错
-               console.log(Object.assign(cursor.value));
-               cursor.continue();
-           }
-       };
+    request.onsuccess = function (event) {
+        var cursor = event.target.result;
+        if (cursor) {
+            // 使用Object.assign方法是为了避免控制台打印时出错
+            console.log(Object.assign(cursor.value));
+            cursor.continue();
+        }
+    };
 
-       request.onerror = function (event) {
-           // 错误处理!
-       };
-   }
-   ```
+    request.onerror = function (event) {
+        // 错误处理!
+    };
+}
+```
 
 #### 使用索引
 
@@ -364,7 +364,7 @@ request.onsuccess = function (event) {
 - binary
 - array
 
-具体说明可以见文档[此处](https://w3c.github.io/IndexedDB/#key-construct)。
+具体说明可以见文档[此处][1]。
 
 ### key path能够接受的数据类型
 
@@ -377,7 +377,7 @@ request.onsuccess = function (event) {
 
 **注：空格不能出现在key path中**。
 
-具体说明可以见文档[此处](https://w3c.github.io/IndexedDB/#key-path-construct)。
+具体说明可以见文档[此处][2]。
 
 ### value能够接受的数据类型
 
@@ -391,7 +391,7 @@ request.onsuccess = function (event) {
 
 ## 安全相关
 
-`IndexedDB`也受到浏览器[同源策略](https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy)的限制。
+`IndexedDB`也受到浏览器[同源策略][3]的限制。
 
 ## 用户相关
 
@@ -410,7 +410,17 @@ request.onsuccess = function (event) {
 但是，`IndexedDB`在使用过程中仍然需要避免可能会出现的一些问题，或者对可能导致的不利影响有一定的容错处理。这样才不会对应用产生重大影响。
 
 # 参考文献
-- [浏览器的同源策略](https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy)
-- [使用indexedDB MDN入门](https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API/Using_IndexedDB)
-- [IndexedDB API参考](https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API)
-- [W3C IndexedDB 2.0规范](https://w3c.github.io/IndexedDB/)
+- [浏览器的同源策略][4]
+- [使用indexedDB MDN入门][5]
+- [IndexedDB API参考][6]
+- [W3C IndexedDB 2.0规范][7]
+
+[1]:	https://w3c.github.io/IndexedDB/#key-construct
+[2]:	https://w3c.github.io/IndexedDB/#key-path-construct
+[3]:	https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy
+[4]:	https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy
+[5]:	https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API/Using_IndexedDB
+[6]:	https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API
+[7]:	https://w3c.github.io/IndexedDB/
+
+[image-1]:	https://user-gold-cdn.xitu.io/2018/3/5/161f6d5133ad6ee7?w=553&h=94&f=png&s=6256
