@@ -1,4 +1,4 @@
-# 概述
+## 概述
 
 本文通过对[virtual-dom](https://github.com/Matt-Esch/virtual-dom)的源码进行阅读和分析，针对Virtual DOM的结构和相关的Diff算法进行讲解，让读者能够对整个数据结构以及相关的Diff算法有一定的了解。
 
@@ -11,9 +11,9 @@ Virtual DOM中Diff算法得到的结果如何映射到真实DOM中，我们将�
 
 注：这个Virtual DOM的实现并不是React Virtual DOM的源码，而是基于[virtual-dom]((https://github.com/Matt-Esch/virtual-dom))这个库。两者在原理上类似，并且这个库更加简单容易理解。相较于这个库，React对Virtual DOM做了进一步的优化和调整，我会在后续的博客中进行分析。
 
-# Virtual DOM的结构
+## Virtual DOM的结构
 
-## VirtualNode
+### VirtualNode
 
 作为Virtual DOM的元数据结构，VirtualNode位于`vnode/vnode.js`文件中。我们截取一部分声明代码来看下内部结构：
 
@@ -40,7 +40,7 @@ VirtualNode.prototype.type = "VirtualNode" // VirtualNode类型，isVnode()检�
 
 上面就是一个VirtualNode的完整结构，包含了特定的标签名、属性、子节点等。
 
-## VText
+### VText
 
 VText是一个纯文本的节点，对应的是HTML中的纯文本。因此，这个属性也只有`text`这一个字段。
 
@@ -54,7 +54,7 @@ VirtualText.prototype.type = "VirtualText"
 
 ```
 
-## VPatch
+### VPatch
 
 VPatch是表示需要对Virtual DOM执行的操作记录的数据结构。它位于`vnode/vpatch.js`文件中。我们来看下里面的具体代码：
 
@@ -84,7 +84,7 @@ VirtualPatch.prototype.type = "VirtualPatch"
 
 其中常量定义了对VNode节点的操作。例如：VTEXT就是增加一个VText节点，PROPS就是当前节点有Props属性改变。
 
-# Virtual DOM的Diff算法
+## Virtual DOM的Diff算法
 
 了解了虚拟DOM中的三个结构，那我们下面来看下Virtual DOM的Diff算法。
 
@@ -96,7 +96,7 @@ VirtualPatch.prototype.type = "VirtualPatch"
 
 下面，我们就来一个一个介绍这些Diff算法。
 
-## VNode的Diff算法
+### VNode的Diff算法
 
 该算法是针对于单个VNode的比较算法。它是用于两个树中单个节点比较的场景。具体算法如下，如果不想直接阅读源码的同学也可以翻到下面，会有相关代码流程说明供大家参考：
 
@@ -180,7 +180,7 @@ function walk(a, b, patch, index) {
 
 这就是单个VNode节点的diff算法全过程。这个算法是整个diff算法的入口，两棵树的比较就是从这个算法开始的。
 
-## Prpps的Diff算法
+### Prpps的Diff算法
 
 看完了单个VNode节点的diff算法，我们来看下上面提到的`diffProps`算法。
 
@@ -244,11 +244,11 @@ function diffProps(a, b) {
 
 整个算法的大致流程如下，因为比较简单，就不画相关流程图了。如果逻辑有些绕的话，可以配合代码食用，效果更佳。
 
-## Vnode children的Diff算法
+### Vnode children的Diff算法
 
 下面让我们来看下最后一个算法，就是关于两个VNode节点的children属性的`diffChildren`算法。这个个diff算法分为两个部分，第一部分是将变化后的结果`b`的children进行顺序调整的算法，保证能够快速的和`a`的children进行比较；第二部分就是将`a`的children与重新排序调整后的`b`的children进行比较，得到相关的patch。下面，让我们一个一个算法来看。
 
-## reorder算法
+### reorder算法
 
 该算法的作用是将`b`节点的children数组进行调整重新排序，让`a`和`b`两个children之间的diff算法更加节约时间。具体代码如下：
 
@@ -431,7 +431,7 @@ function reorder(aChildren, bChildren) {
 
 通过上面这个排序算法，我们可以得到一个新的`b`的children数组。在使用这个数组来进行比较厚，我们可以将两个children数组之间比较的时间复杂度从o(n^2)转换成o(n)。具体的方法和效果我们可以看下面的DiffChildren算法。
 
-## DiffChildren算法
+### DiffChildren算法
 
 ```javascript
 function diffChildren(a, b, patch, apply, index) {
@@ -478,7 +478,7 @@ function diffChildren(a, b, patch, apply, index) {
 
 通过上面的重新排序算法整理了以后，两个children比较就只需在相同下标的情况下比较了，即aChildren的第N个元素和bChildren的第N个元素进行比较。然后较长的那个元素做`insert`操作（bChildren）或者`remove`操作（aChildren）即可。最后，我们将move操作再增加到patch中，就能够抵消我们在reorder时对整个数组的操作。这样只需要一次便利就得到了最终的patch值。
 
-# 总结
+## 总结
 
 整个Virtual DOM的diff算法设计的非常精巧，通过三个不同的分部算法来实现了VNode、Props和Children的diff算法，将整个Virtual DOM的的diff操作分成了三类。同时三个算法又互相递归调用，对两个Virtual DOM数做了一次（伪）深度优先的递归比较。
 
