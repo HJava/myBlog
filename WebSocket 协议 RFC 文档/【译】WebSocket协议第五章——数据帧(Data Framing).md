@@ -280,13 +280,13 @@ transfromed-octed-i = original-octet-i XOR masking-key-octet-j
 
 #### 5.5.3 心跳Pong
 
-心跳Ping帧包含的操作码是0xA。
+心跳Pong帧包含的操作码是0xA。
 
 5.5.2节详细说明了Ping帧和Pong帧的要求。
 
 作为回应发送的Pong帧必须完整携带Ping帧中传递过来的“应用数据”字段。
 
-如果终端收到一个Ping帧但是没有发送Pong帧来回应之前的pong帧，那么终端可能选择用Pong帧来回复最近处理的那个Ping帧。
+如果终端收到一个Ping帧但是没有发送Pong帧来回应之前的ping帧，那么终端可能选择用Pong帧来回复最近处理的那个Ping帧。
 
 Pong帧可以被主动发送。这会作为一个单项的心跳。预期外的Pong包的响应没有规定。
 
