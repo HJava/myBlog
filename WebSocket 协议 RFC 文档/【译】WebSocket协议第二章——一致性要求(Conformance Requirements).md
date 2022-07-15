@@ -7,7 +7,7 @@
 
 在这篇文档中，所有的图、示例和笔记都是非规范性的，就像标注了非规范性的所有章节一样。在文档中没有指定的其他内容都是规范性的。
 
-在这篇文档中的关键词如“必须（MUST）”、“必须不（MUST NOT）”、“需要（RWQUIRE）”、“应该（SHALL）”、“不应该（SHALL NOT）”、“应该（SHOULD）”、“不应该（SHOULD NOT）”、“推荐（RECOMMENDED）”、“也许（MAY）”和“可选（OPTIONAL）”可以按照[RFC2119
+在这篇文档中的关键词如“必须（MUST）”、“必须不（MUST NOT）”、“需要（REQUIRED）”、“应该（SHALL）”、“不应该（SHALL NOT）”、“应该（SHOULD）”、“不应该（SHOULD NOT）”、“推荐（RECOMMENDED）”、“也许（MAY）”和“可选（OPTIONAL）”可以按照[RFC2119
 ](https://tools.ietf.org/html/rfc2119)所述进行解释。
 
 作为算法的一部分的命令式语句（如“删除任何前导空格”或“返回false并且中止后续步骤”）在介绍算法时应该与关键词一起解释（“必须（MUST）”、“应该（SHOULD）”、“也许（MAY）”等）。
