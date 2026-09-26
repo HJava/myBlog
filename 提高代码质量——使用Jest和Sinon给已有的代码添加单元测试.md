@@ -2,7 +2,7 @@
 
 在日常的功能开发中，我们的代码测试都依赖于自己或者QA进行测试。这些操作不仅费时费力，而且还依赖开发者自身的驱动。在开发一些第三方依赖的库时，我们也没有办法给第三方提供完整的代码质量报告。
 
-现在，我们可以使用单元测试来提高自己的代码质量。下面，我将自己在使用Jest和Sinon.js配置和编写单元测试中的收获的经验和踩到的坑进行总结，根据从零开始配置和编写单元测试这一条线来进行分享。
+现在，我们可以使用单元测试来提高自己的代码质量。下面，我将自己在使用Jest和Sinon.js配置和编写单元测试中收获的经验和踩到的坑进行总结，根据从零开始配置和编写单元测试这一条线来进行分享。
 
 通过本文，你可以解决以下问题：
 
@@ -12,7 +12,7 @@
 
 # Jest与Sinon.js是什么
 
-[Jest](https://facebook.github.io/jest/)是FaceBook推出的一个针对JavaScript进行单元测试的库，它提供了断言、函数模拟等API来对你自己编写的业务逻辑代码进行测试后。
+[Jest](https://facebook.github.io/jest/)是Facebook推出的一个针对JavaScript进行单元测试的库，它提供了断言、函数模拟等API来对你自己编写的业务逻辑代码进行测试。
 
 [Sinon.js](http://sinonjs.org/)是一个用来做独立测试和模拟的JavaScript库。它在单元测试的编写中通常用来模拟HTTP等相关请求。
 
@@ -22,7 +22,7 @@
 
 但是，在处理webpack alias的问题时，通过官方[issue](https://github.com/avajs/ava/issues/1011)中的极其复杂的配置也没有能够解决出现`Cannot find module`的问题（其中一个解决此问题的插件[babel-plugin-webpack-loaders](https://github.com/istarkov/babel-plugin-webpack-loaders)中竟然是推荐直接使用Jest，囧）。
 
-而在Jest中，可以很方便的通过一些简单配置，就能够识别在文件中使用的webpack alias，相关的具体方法将会在后面章节进行具体描述。
+而在Jest中，可以很方便地通过一些简单配置，就能够识别在文件中使用的webpack alias，相关的具体方法将会在后面章节进行具体描述。
 
 而对于其他的测试框架如：[Mocha](https://mochajs.org/)或者[Chai](http://www.chaijs.com/)等，没有进行具体的了解，因此在这里不多做评价。
 
@@ -80,7 +80,7 @@ npm install sinon -D
 const sinon = require('sinon');
 ```
 
-在我的项目中，主要是使用Sinon.js来模拟HTTP请求。在Sinon.js的文档中，有专门关于[XMLHttpRequest对象的模拟](http://sinonjs.org/releases/v4.5.0/fake-xhr-and-server/)的章节，在下一章中，我们将会针对项目中sinon.js的使用进行简单的介绍。
+在我的项目中，主要是使用Sinon.js来模拟HTTP请求。在Sinon.js的文档中，有专门关于[XMLHttpRequest对象的模拟](http://sinonjs.org/releases/v4.5.0/fake-xhr-and-server/)的章节，在下一章中，我们将会针对项目中Sinon.js的使用进行简单的介绍。
 
 
 ## 编写单元测试
@@ -91,13 +91,13 @@ const sinon = require('sinon');
 - 异步函数测试
 - HTTP测试
 
-同时，我们会对当中使用到的Jest和Sinon.js的API会进行简单介绍，如果需要使用其他的API，可以自行阅读[Jest](https://facebook.github.io/jest/)和[Sinon.js](http://sinonjs.org/)的文档。
+同时，我们会对当中使用到的Jest和Sinon.js的API进行简单介绍，如果需要使用其他的API，可以自行阅读[Jest](https://facebook.github.io/jest/)和[Sinon.js](http://sinonjs.org/)的文档。
 
 通过上面三类测试，我们基本能够覆盖现有项目中的所有代码。
 
 ### 同步函数测试
 
-同步函数的测试过程是这几个中最简单的一部分，我们可以测试函数返回值，也能够[测试传入的高阶函数](https://facebook.github.io/jest/docs/en/mock-functions.html)。下面我们通过一个具体的例子来看下。
+同步函数的测试过程是这几个中最简单的一部分，我们可以测试函数返回值，也能够[测试传入的回调函数](https://facebook.github.io/jest/docs/en/mock-functions.html)。下面我们通过一个具体的例子来看下。
 
 源代码文件，一个纯函数：
 ```javascript
@@ -149,9 +149,10 @@ export default function(callback) {
 // user.test.js
 import userFunc from './user';
 
-test('user', () => {
+test('user', (done) => {
     userFunc((data) => {
-        expect(data).toEqual({username: 'hjava'}); // 对象比较用beEqual()
+        expect(data).toEqual({username: 'hjava'}); // 对象比较用toEqual()
+        done();
     });
 });
 ```
@@ -171,7 +172,7 @@ export default function(callback) {
 import userFunc from './user';
 
 test('user', () => {
-    userFunc().then((data) => {
+    return userFunc().then((data) => {
         expect(data).toEqual({username: 'hjava'});
     });
 });
@@ -190,7 +191,7 @@ export default function(callback) {
 
 ```javascript
 // user.test.js
-import Sinon from 'sinon';
+import sinon from 'sinon';
 import userFunc from 'user';
 
 let XHR;
@@ -227,7 +228,7 @@ test('user', () => {
 
 # 如何解决进行单元测试中遇到的常见问题？ 
 
-在本章中，我们总结了如下问题来进行介绍，希望大家再遇到相同问题时能够快速解决：
+在本章中，我们总结了如下问题来进行介绍，希望大家在遇到相同问题时能够快速解决：
 
 - 如何统计Jest单元测试覆盖率
 - 如何设置单元测试文件不使用本地的babel配置
@@ -236,7 +237,7 @@ test('user', () => {
 
 ## 如何统计单元测试覆盖率？
 
-不像ava一样，需要使用syc来进行计算，Jest内置了统计单元测试覆盖率的工具，只需要简单配置即可达到相关的要求。具体配置如下：
+不像ava一样，需要使用nyc来进行计算，Jest内置了统计单元测试覆盖率的工具，只需要简单配置即可达到相关的要求。具体配置如下：
 
 ```json
 // package.json

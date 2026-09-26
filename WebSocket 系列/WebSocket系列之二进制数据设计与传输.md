@@ -23,7 +23,7 @@
 {
     "id": "short", // 消息类型，1是文本协议格式；2是图片协议格式；3是文件协议格式
     "sender": "long", // 发送用户唯一id
-    "reciever": "long", // 接受用户唯一id
+    "reciever": "long", // 接收用户唯一id
     "data": "string" // 消息内容，如果是文本协议则为文本内容；如果是图片协议则为图片地址；如果是文件协议则为文件地址
 }
 ```
@@ -43,7 +43,7 @@
 2. 接下来8个Byte中放入`sender`。
 3. 再接下来8个Byte放入`reciever`。
 4. 最后紧接着放入一个string类型（以[WebSocket系列之字符串如何与二进制数据进行转换](https://juejin.im/post/5abdc38ef265da2375070008)博客中的格式为例，先将字符串长度构造成一个int类型，放在前4个Byte中，接下来将string类型编码后放入）。
-此数据就完全按照协议构造完成了。我们只需将次协议通过WebSocket发送即可。具体方法将会在后面章节中说明。
+此数据就完全按照协议构造完成了。我们只需将此协议通过WebSocket发送即可。具体方法将会在后面章节中说明。
 ### 接收消息
 从协议格式可知，当我们收到一条消息时，只需要按照协议规范来进行反向解析即可。例如：
 ```json
@@ -70,17 +70,17 @@
 let arrayBuffer = getArrayBufferMessagesFromUser(); // 获取用户需要发送的消息数据,为一个ArrayBuffer对象
 let webSocket = getWebSocket(); // 获取已经连接成功的WebSocket实例
 
-websocket.binaryType = 'arraybuffer'; // 指定WebSocket接受ArrayBuffer实例作为参数
+webSocket.binaryType = 'arraybuffer'; // 指定WebSocket接收的二进制数据类型为ArrayBuffer
 
 webSocket.send(arrayBuffer);
 ```
-通过上面的示例我们可以知道，WebSocket在发送string类型的数据或者ArrayBuffer类型的数据时，使用的API接口都是`send`方法，我们只需要在WebSocket初始化后指定传输类型`binaryType`即可。
+通过上面的示例我们可以知道，WebSocket在发送string类型的数据或者ArrayBuffer类型的数据时，使用的API接口都是`send`方法，直接将ArrayBuffer作为参数传入即可（`binaryType`只影响接收到的二进制数据的类型，默认为`blob`）。
 # WebSocket如何处理接收的二进制数据
-通过`WebSocket如何发送二进制数据`一章，我们知道了如何发送二进制数据。接下来，让我们开看下如何处理WebSocket接收到的二进制数据：
+通过`WebSocket如何发送二进制数据`一章，我们知道了如何发送二进制数据。接下来，让我们来看下如何处理WebSocket接收到的二进制数据：
 ```
 let webSocket = getWebSocket(); // 获取已经连接成功的WebSocket实例
 
-websocket.binaryType = 'arraybuffer'; // 指定WebSocket接受ArrayBuffer实例作为参数
+webSocket.binaryType = 'arraybuffer'; // 指定WebSocket接收的二进制数据类型为ArrayBuffer
 
 webSocket.addEventListener('message', (message) => {
     let arrayBuffer = message.data; // 获取用户接收到的消息数据,为一个ArrayBuffer对象
@@ -90,5 +90,5 @@ webSocket.addEventListener('message', (message) => {
 通过上面的示例我们可以知道，当我们在建立连接时指定了传输类型`binaryType`为ArrayBuffer之后，我们通过WebSocket收到的数据也是一个ArrayBuffer实例。我们只需要根据第一章讲解的方式进行解析即可。
 # 总结
 本文作为WebSocket系列的第四篇，通过一个IM聊天应用的示例将前三篇博客分享的内容串联起来，给读者完整介绍了在WebSocket中使用二进制数据进行传输的方法以及相关的数据类型转换。
-通过前面4篇博客的内容，读者可以根据自己的需求快速的构造和封装WebSocket进行二进制数据传输，基本能够串联整个应用流程。
+通过前面4篇博客的内容，读者可以根据自己的需求快速地构造和封装WebSocket进行二进制数据传输，基本能够串联整个应用流程。
 WebSocket系列下一篇文章将会介绍在线上环境中，如何保证WebSocket的连接，以及线上可能遇到的问题。通过应对WebSocket可能出现的问题，我们能够让整个长连接更加健壮。

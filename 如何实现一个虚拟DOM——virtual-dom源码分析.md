@@ -9,7 +9,7 @@ Virtual DOM中Diff算法得到的结果如何映射到真实DOM中，我们将�
 - Virtual DOM的结构
 - Virtual DOM的Diff算法
 
-注：这个Virtual DOM的实现并不是React Virtual DOM的源码，而是基于[virtual-dom]((https://github.com/Matt-Esch/virtual-dom))这个库。两者在原理上类似，并且这个库更加简单容易理解。相较于这个库，React对Virtual DOM做了进一步的优化和调整，我会在后续的博客中进行分析。
+注：这个Virtual DOM的实现并不是React Virtual DOM的源码，而是基于[virtual-dom](https://github.com/Matt-Esch/virtual-dom)这个库。两者在原理上类似，并且这个库更加简单容易理解。相较于这个库，React对Virtual DOM做了进一步的优化和调整，我会在后续的博客中进行分析。
 
 ## Virtual DOM的结构
 
@@ -42,7 +42,7 @@ VirtualNode.prototype.type = "VirtualNode" // VirtualNode类型，isVnode()检�
 
 ### VText
 
-VText是一个纯文本的节点，对应的是HTML中的纯文本。因此，这个属性也只有`text`这一个字段。
+VText是一个纯文本的节点，对应的是HTML中的纯文本。因此，这个结构也只有`text`这一个字段。
 
 ```javascript
 function VirtualText(text) {
@@ -82,7 +82,7 @@ VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 ```
 
-其中常量定义了对VNode节点的操作。例如：VTEXT就是增加一个VText节点，PROPS就是当前节点有Props属性改变。
+其中常量定义了对VNode节点的操作。例如：VTEXT就是将节点替换（或更新）为一个VText节点，PROPS就是当前节点有Props属性改变。
 
 ## Virtual DOM的Diff算法
 
@@ -170,21 +170,21 @@ function walk(a, b, patch, index) {
 
 1. 如果`a`和`b`这两个VNode全等，则认为没有修改，直接返回。
 2. 如果其中有一个是thunk，则使用thunk的比较方法`thunks`。
-3. 如果`a`是widget且`b`为空，那么通过递归将`a`和它的子节点的`remove`操作添加到patch中。
+3. 如果`b`为空，那么将`a`的`remove`操作添加到patch中；如果`a`不是widget，还会先通过递归将`a`子节点中widget的`remove`操作和hook的清除操作添加到patch中。
 4. 如果`b`是VNode的话，
-    1. 如果`a`也是VNode，那么比较`tagName`、`namespace`、`key`，如果相同则比较两个VNode的Props（用下面提到的diffProps算法），同时比较两个VNode的children（用下面提到的diffChildren算法）；如果不同则直接将`b`节点的`insert`操作添加到patch中，同时将标记位置为true。
-    2. 如果`a`不是VNode，那么直接将`b`节点的`insert`操作添加到patch中，同时将标记位置为true。
+    1. 如果`a`也是VNode，那么比较`tagName`、`namespace`、`key`，如果相同则比较两个VNode的Props（用下面提到的diffProps算法），同时比较两个VNode的children（用下面提到的diffChildren算法）；如果不同则直接将`b`节点的`VNode`操作（即替换节点）添加到patch中，同时将标志位置为true。
+    2. 如果`a`不是VNode，那么直接将`b`节点的`VNode`操作（即替换节点）添加到patch中，同时将标志位置为true。
 5. 如果`b`是VText的话，看`a`的类型是否为VText，如果不是，则将`VText`操作添加到patch中，并且将标志位设置为true；如果是且文本内容不同，则将`VText`操作添加到patch中。
-6. 如果`b`是Widget的话，看`a`的类型是否为widget，如果是，将标志位设置为true。不论`a`类型为什么，都将`Widget`操作添加到patch中。
-7. 检查标志位，如果标识为为true，那么通过递归将`a`和它的子节点的`remove`操作添加到patch中。
+6. 如果`b`是Widget的话，看`a`的类型是否为widget，如果不是，将标志位设置为true。不论`a`类型为什么，都将`Widget`操作添加到patch中。
+7. 检查标志位，如果标志位为true，那么通过递归将`a`及其子节点中widget的`remove`操作和hook的清除操作添加到patch中。
 
 这就是单个VNode节点的diff算法全过程。这个算法是整个diff算法的入口，两棵树的比较就是从这个算法开始的。
 
-### Prpps的Diff算法
+### Props的Diff算法
 
 看完了单个VNode节点的diff算法，我们来看下上面提到的`diffProps`算法。
 
-该算法是针对于两个比较的VNode节点的Props比较算法。它是用于两个场景中key值和标签名都相同的情况。具体算法如下，如果不想直接阅读源码的同学也可以翻到下面，会有相关代码流程说明供大家参考：
+该算法是针对于两个比较的VNode节点的Props比较算法。它是用于两个节点key值和标签名都相同的情况。具体算法如下，如果不想直接阅读源码的同学也可以翻到下面，会有相关代码流程说明供大家参考：
 
 ```javascript
 function diffProps(a, b) {
@@ -236,17 +236,17 @@ function diffProps(a, b) {
 
 1. 遍历`a`对象。
     1. 当key值不存在于`b`，则将此值存储下来，value赋值为`undefined`。
-    2. 当此key对应的两个属性都相同时，继续终止此次循环，进行下次循环。
+    2. 当此key对应的两个属性都相同时，终止此次循环，进行下次循环。
     3. 当key值对应的value不同且key值对应的两个value都是对象时，判断Prototype值，如果不同则记录key对应的`b`对象的值；如果`b`对应的value是`hook`的话，记录b的值。
-    4. 上面条件判断都不同且都是对象时，则继续比较key值对应的两个对象（递归）。
+    4. 上面条件判断都不满足且都是对象时，则继续比较key值对应的两个对象（递归）。
     5. 当有一个不是对象时，直接将`b`对应的value进行记录。
 2. 遍历`b`对象，将所有`a`对象中不存在的key值对应的对象都记录下来。
 
-整个算法的大致流程如下，因为比较简单，就不画相关流程图了。如果逻辑有些绕的话，可以配合代码食用，效果更佳。
+整个算法的大致流程如上，因为比较简单，就不画相关流程图了。如果逻辑有些绕的话，可以配合代码食用，效果更佳。
 
 ### Vnode children的Diff算法
 
-下面让我们来看下最后一个算法，就是关于两个VNode节点的children属性的`diffChildren`算法。这个个diff算法分为两个部分，第一部分是将变化后的结果`b`的children进行顺序调整的算法，保证能够快速的和`a`的children进行比较；第二部分就是将`a`的children与重新排序调整后的`b`的children进行比较，得到相关的patch。下面，让我们一个一个算法来看。
+下面让我们来看下最后一个算法，就是关于两个VNode节点的children属性的`diffChildren`算法。这个diff算法分为两个部分，第一部分是将变化后的结果`b`的children进行顺序调整的算法，保证能够快速地和`a`的children进行比较；第二部分就是将`a`的children与重新排序调整后的`b`的children进行比较，得到相关的patch。下面，让我们一个一个算法来看。
 
 ### reorder算法
 
@@ -425,11 +425,11 @@ function reorder(aChildren, bChildren) {
 2. 如果存在，初始化一个数组newChildren，遍历`a`的children元素。
     1. 如果aChildren存在key值，则去bChildren中找对应key值，如果bChildren存在则放入新数组中，不存在则放入一个null值。
     2. 如果aChildren不存在key值，则从bChildren中不存在key值的第一个元素开始取，放入新数组中。
-3. 遍历bChildren，将所有achildren中没有的key值对应的value或者没有key，并且没有放入新数组的子节点放入新数组中。
+3. 遍历bChildren，将所有aChildren中没有的key值对应的value或者没有key，并且没有放入新数组的子节点放入新数组中。
 4. 将bChildren和新数组逐个比较，得到从新数组转换到bChildren数组的`move`操作patch（即`remove`+`insert`）。
 5. 返回新数组和`move`操作列表。
 
-通过上面这个排序算法，我们可以得到一个新的`b`的children数组。在使用这个数组来进行比较厚，我们可以将两个children数组之间比较的时间复杂度从o(n^2)转换成o(n)。具体的方法和效果我们可以看下面的DiffChildren算法。
+通过上面这个排序算法，我们可以得到一个新的`b`的children数组。在使用这个数组来进行比较后，我们可以将两个children数组之间比较的时间复杂度从O(n^2)转换成O(n)。具体的方法和效果我们可以看下面的DiffChildren算法。
 
 ### DiffChildren算法
 
@@ -476,10 +476,10 @@ function diffChildren(a, b, patch, apply, index) {
 }
 ```
 
-通过上面的重新排序算法整理了以后，两个children比较就只需在相同下标的情况下比较了，即aChildren的第N个元素和bChildren的第N个元素进行比较。然后较长的那个元素做`insert`操作（bChildren）或者`remove`操作（aChildren）即可。最后，我们将move操作再增加到patch中，就能够抵消我们在reorder时对整个数组的操作。这样只需要一次便利就得到了最终的patch值。
+通过上面的重新排序算法整理了以后，两个children比较就只需在相同下标的情况下比较了，即aChildren的第N个元素和bChildren的第N个元素进行比较。然后较长数组中多出的元素做`insert`操作（bChildren）或者`remove`操作（aChildren）即可。最后，我们将move操作再增加到patch中，就能够抵消我们在reorder时对整个数组的操作。这样只需要一次遍历就得到了最终的patch值。
 
 ## 总结
 
-整个Virtual DOM的diff算法设计的非常精巧，通过三个不同的分部算法来实现了VNode、Props和Children的diff算法，将整个Virtual DOM的的diff操作分成了三类。同时三个算法又互相递归调用，对两个Virtual DOM数做了一次（伪）深度优先的递归比较。
+整个Virtual DOM的diff算法设计得非常精巧，通过三个不同的分部算法来实现了VNode、Props和Children的diff算法，将整个Virtual DOM的diff操作分成了三类。同时三个算法又互相递归调用，对两个Virtual DOM树做了一次（伪）深度优先的递归比较。
 
-下面一片博客，我会介绍如何将得到的VPatch操作应用到真实的DOM中，从而导致HTML树的变化。
+下面一篇博客，我会介绍如何将得到的VPatch操作应用到真实的DOM中，从而导致HTML树的变化。

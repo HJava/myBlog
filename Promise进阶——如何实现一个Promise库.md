@@ -57,7 +57,7 @@ function nextTick(func) {
 }
 ```
 
-通过上面的代码我们可以看到，我们一共使用了`setImmediate`、`postMessage`、`setTimeout`这三个添加宏任务的方法来进行一步函数执行。
+通过上面的代码我们可以看到，我们一共使用了`setImmediate`、`postMessage`、`setTimeout`这三个添加宏任务的方法来进行异步函数执行。
 
 ## 常量与属性
 
@@ -65,7 +65,7 @@ function nextTick(func) {
 
 ### 常量
 
-首先，Promise共有5个状态，我们需要用常量来进行定义，具体如下：
+首先，在我们的实现中，Promise共有5个状态，我们需要用常量来进行定义，具体如下：
 
 ```ts
 enum State {
@@ -100,11 +100,11 @@ class Promise {
 - `_reason`，表示在rejected状态时，用来存储当前的原因。
 - `_next`，表示当前Promise后面跟着`then`函数的引用。
 - `fn`，表示当前Promise中的`then`方法的第一个回调函数。
-- `er`，表示当前Promise中的`then`方法的的第二个回调函数（即`catch`的第一个参数，下面看`catch`实现方法就能理解）。
+- `er`，表示当前Promise中的`then`方法的第二个回调函数（即`catch`的第一个参数，下面看`catch`实现方法就能理解）。
 
 ## 类方法
 
-看完了常量与类的属性，我们来看下类的静态方法。
+看完了常量与类的属性，我们来看下类方法。
 
 ### Constructor
 
@@ -133,7 +133,7 @@ class Promise {
 }
 ```
 
-从Promise/A+的规范来看，我们可以知道，如果`resolver`存在并且不是一个function的话，那么我们就应该抛出一个错误；否则，我们应该将`resolve`和`reject`方法传给`resolver`作为参数。
+从ES6 Promise的规范来看，我们可以知道，如果`resolver`存在并且不是一个function的话，那么我们就应该抛出一个错误；否则，我们应该将`resolve`和`reject`方法传给`resolver`作为参数。
 
 ### resolve && reject
 
@@ -166,13 +166,13 @@ class Promise {
 }
 ```
 
-从上面的代码中我们可以看到，当`resolve`或者`reject`方法被触发时，我们都改变了当前这个Proimse的状态，并且异步调用执行了`_handleNextTick`方法。状态的改变标志着当前的Promise已经从`pending`状态改变成了`resolving`或者`rejecting`状态，而相应`_value`和`_reson`也表示上一个Promise传递给下一个Promise的数据。
+从上面的代码中我们可以看到，当`resolve`或者`reject`方法被触发时，我们都改变了当前这个Promise的状态，并且异步调用执行了`_handleNextTick`方法。状态的改变标志着当前的Promise已经从`pending`状态改变成了`resolving`或者`rejecting`状态，而相应的`_value`和`_reason`也表示上一个Promise传递给下一个Promise的数据。
 
 那么，这个`_handleNextTick`方法又是做什么的呢？其实，这个方法的作用很简单，就是用来处理当前这个Promise后面跟着的`then`函数传递进来的回调函数`fn`和`er`。
 
 ### then && catch
 
-在了解`_handleNextTick`之前，我们们先看下`then`函数和`catch`函数的实现。
+在了解`_handleNextTick`之前，我们先看下`then`函数和`catch`函数的实现。
 
 ```ts
 class Promise {
@@ -200,7 +200,7 @@ class Promise {
 
 因为`catch`函数调用就是一个`then`函数的别名，我们下面就只讨论`then`函数。
 
-在`then`函数执行时，我们会创建一个新的Promise，然后将传入的两个回调函数用新的Promise的属性保存下来。然后，先判断当前的Promise的状态，如果已经是`resolved`或者`rejected`状态时，我们立即调用新的Promise中`resolve`或者`reject`方法，让下将当前Promise的`_value`或者`_reason`传递给下一个Promise，并且触发下一个Promise的状态改变。如果当前Promise的状态仍然为`pending`时，那么就将这个新生成的Promise保存下来，等当前这个Promise的状态改变后，再触发新的Promise变化。最后，我们返回了这个Promise的实例。
+在`then`函数执行时，我们会创建一个新的Promise，然后将传入的两个回调函数用新的Promise的属性保存下来。然后，先判断当前的Promise的状态，如果已经是`resolved`或者`rejected`状态时，我们立即调用新的Promise中`resolve`或者`reject`方法，将当前Promise的`_value`或者`_reason`传递给下一个Promise，并且触发下一个Promise的状态改变。如果当前Promise的状态仍然为`pending`时，那么就将这个新生成的Promise保存下来，等当前这个Promise的状态改变后，再触发新的Promise变化。最后，我们返回了这个Promise的实例。
 
 ### handleNextTick
 
@@ -238,7 +238,7 @@ class Promise {
 
 我们先来看一个简单版的`_handleNextTick`函数，这样能够帮助我们快速理解Promise主流程。
 
-异步触发了`_handleNextTick`函数后，我们会判断当前用户处于的状态，如果当前Promise是`resolving`状态，我们就会调用`fn`函数，即我们在`then`函数调用时给新的Promise设置的那个`fn`函数；而如过当前Promise是`rejecting`状态，我们就会调用`er`函数。
+异步触发了`_handleNextTick`函数后，我们会判断当前Promise所处的状态，如果当前Promise是`resolving`状态，我们就会调用`fn`函数，即我们在`then`函数调用时给新的Promise设置的那个`fn`函数；而如果当前Promise是`rejecting`状态，我们就会调用`er`函数。
 
 上面提到的`getThis`方法是用来获取特定的this值，具体的规范要求我们将在稍后再进行介绍。
 
@@ -278,19 +278,19 @@ class Promise {
 }
 ```
 
-从`_finishThisTypeScriptPromise`函数中我们可以看到，我们在得到了需要传递给下一个Promise的`_value`或者`_reason`后，利用`map`方法逐个调用我们保存的新生成的Promise实例，调用它的`resolve`方法，因此我们又触发了这个Promise的状态从`pending`转变为`resolving`或者`rejecting`。
+从`_finishThisTypeScriptPromise`函数中我们可以看到，我们在得到了需要传递给下一个Promise的`_value`或者`_reason`后，利用`map`方法逐个调用我们保存的新生成的Promise实例，调用它的`resolve`或者`reject`方法，因此我们又触发了这个Promise的状态从`pending`转变为`resolving`或者`rejecting`。
 
 到这里我们就已经完全了解了一个Promise从最开始的创建，到最后结束的整个生命周期。下面我们来看下在Promise/A+规范中提到的一些分支逻辑的处理情况。
 
 ### 上一个Promise传递的value是Thenable实例
 
-首先，让我们来了解下什么是Thenable实例。Thenable实例指的是属性中有`then`函数的对象。Promise就是的一种特殊的Thenable对象。
+首先，让我们来了解下什么是Thenable实例。Thenable实例指的是属性中有`then`函数的对象。Promise就是一种特殊的Thenable对象。
 
 下面，为了方便讲解，我们将用Promise来代替Thenable进行讲解，其他的Thenable类大家可以参考类似思路进行分析。
 
-如果我们在传递给我们的`_value`中是一个Promise实例，那么我们必须在等待传入的Promise状态转换到`resolved`之后，当前的Promise才能够继续往下执行，即我们从传入的Promise中得到了一个非Thenable返回值时，我们才能用这个值来调用属性中的`fn`或者`er`方法。
+如果传递给我们的`_value`是一个Promise实例，那么我们必须等待传入的Promise状态转换到`resolved`或者`rejected`之后，当前的Promise才能够继续往下执行，即我们从传入的Promise中得到了一个非Thenable返回值时，我们才能用这个值来调用属性中的`fn`或者`er`方法。
 
-那么，我们要怎么样才能获取到传入的这个Promise的返回值呢？在Promise中其实用到了一个非常巧妙的方法：因为传入的Promise中有一个`then`函数（Thenable定义），因此我们就调用`then`函数，在第一个回调函数`fn`中传入获取`_value`，触发当前的Promise继续执行。如果是触发了第二个回调函数`er`，那么就用在`er`中得到的`_reason`来拒绝掉当前的Promise。具体判断逻辑如下：
+那么，我们要怎么样才能获取到传入的这个Promise的返回值呢？在Promise中其实用到了一个非常巧妙的方法：因为传入的Promise中有一个`then`函数（Thenable定义），因此我们就调用`then`函数，在第一个回调函数`fn`中获取`_value`，触发当前的Promise继续执行。如果是触发了第二个回调函数`er`，那么就用在`er`中得到的`_reason`来拒绝掉当前的Promise。具体判断逻辑如下：
 
 ```ts
 class Promise {
@@ -299,7 +299,7 @@ class Promise {
         let count = 0;
 
         try {
-            // 判断传入的this._value是否为一个thanable
+            // 判断传入的this._value是否为一个thenable
             // check if this._value a thenable
             ref = this._value && this._value.then;
         } catch (e) {
@@ -362,7 +362,7 @@ class Promise {
 
 ### promise === value
 
-在Promise/A+规范中，如果返回的`_value`值等于用户自身时，需要用TypeError错误拒绝掉当前的Promise。因此我们需要在`_handleNextTick`中加入以下判断代码：
+在Promise/A+规范中，如果返回的`_value`值等于当前Promise自身时，需要用TypeError错误拒绝掉当前的Promise。因此我们需要在`_handleNextTick`中加入以下判断代码：
 
 ```ts
 class Promise {
@@ -371,7 +371,7 @@ class Promise {
         let count = 0;
 
         try {
-            // 判断传入的this._value是否为一个thanable
+            // 判断传入的this._value是否为一个thenable
             // check if this._value a thenable
             ref = this._value && this._value.then;
         } catch (e) {
@@ -574,13 +574,13 @@ class Promise {
 }
 ```
 
-`race`的思路与`all`基本一致。只是我们在处理函数上不同。当我们只要检测到数组中的Promise有一个已经转换到了`resolve`或者`rejected`状态（通过没有`then`函数来进行判断）时，就会立即出发新创建的Promise示例的状态从`pending`转换为`resolving`或者`rejecting`。
+`race`的思路与`all`基本一致。只是我们在处理函数上不同。当我们只要检测到数组中的Promise有一个已经转换到了`resolved`或者`rejected`状态（通过没有`then`函数来进行判断）时，就会立即触发新创建的Promise实例的状态从`pending`转换为`resolving`或者`rejecting`。
 
 # 总结
 
-我们对Promise的异步函数执行器、常量与属性、类方法、类静态方法进行了逐一介绍，让大家对整个Promise的构造和声明周期有了一个深度的理解和认知。在整个开发中需要注意到的一些关键点和细节，我在上面也一一说明了。大家只需要按照这个思路，对照[Promise/A+规范][3]就能够完成一个符合规范的Promise库。
+我们对Promise的异步函数执行器、常量与属性、类方法、类静态方法进行了逐一介绍，让大家对整个Promise的构造和生命周期有了一个深度的理解和认知。在整个开发中需要注意到的一些关键点和细节，我在上面也一一说明了。大家只需要按照这个思路，对照[Promise/A+规范][3]就能够完成一个符合规范的Promise库。
 
-最后，给大家提供一个[Promise/A+测试工具][4]，大家实现了自己的Promise后，可以使用这个工具来测试是否完全符合整个Promise/A+规范。当然，大家如果想使用我的现成代码，也欢迎大家使用我的代码[Github/typescript-proimse][5]。
+最后，给大家提供一个[Promise/A+测试工具][4]，大家实现了自己的Promise后，可以使用这个工具来测试是否完全符合整个Promise/A+规范。当然，大家如果想使用我的现成代码，也欢迎大家使用我的代码[Github/typescript-promise][5]。
 
 [1]:	https://juejin.im/post/5b9ce8fe6fb9a05cf3711c98 "[译]前端基础知识储备——Promise/A+规范"
 [2]:	https://juejin.im/post/5bdaf5d95188257fa660c0d1

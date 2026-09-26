@@ -37,7 +37,7 @@ console.log(chalk.red('hello world'));
 
 [ora](https://github.com/sindresorhus/ora)可以在终端实现Loading的效果，可以在与用户进行交互后使用。
 
-从官网的实例来看，我们可以实现以下的效果：
+从官网的示例来看，我们可以实现以下的效果：
 
 ![](https://camo.githubusercontent.com/5668f3a74ede2534f047a1cdda3a6a659939aa3d/68747470733a2f2f7261776769742e636f6d2f73696e647265736f726875732f6f72612f6d61737465722f73637265656e73686f742e737667)
 
@@ -64,7 +64,7 @@ inquirer.prompt([{type: 'confirm', name: 'OK', message: 'Are you OK?', default: 
 
 最常见的文件模板下载，都是通过将文件上传到CDN中，然后再通过某个特定的格式下载到页面上。
 
-但是，如果你想要通过比较优雅的方式来进行文件下载，可以通过[download-git-repo](https://github.com/flipxfx/download-git-repo)来下载你再Git上面已经准备好的模板，这样就能够在下载的过程中保证文件目录和顺序，比之前自己创建和检测文件夹会简便很多。
+但是，如果你想要通过比较优雅的方式来进行文件下载，可以通过[download-git-repo](https://github.com/flipxfx/download-git-repo)来下载你在Git上面已经准备好的模板，这样就能够在下载的过程中保证文件目录和顺序，比之前自己创建和检测文件夹会简便很多。
 
 ### 怎么对下载的文件进行处理
 
@@ -78,7 +78,7 @@ inquirer.prompt([{type: 'confirm', name: 'OK', message: 'Are you OK?', default: 
 
 如果你想要一套现成的模板编译工具，可以使用现成的如[Handlebars](https://github.com/daaain/Handlebars)。
 
-他能够像后端模板语言一样，直接针对类HTML文件进行处理，我们可以看下官方的例子。
+它能够像后端模板语言一样，直接针对类HTML文件进行处理，我们可以看下官方的例子。
 
 ```html
 <div class="entry">
@@ -91,7 +91,7 @@ inquirer.prompt([{type: 'confirm', name: 'OK', message: 'Are you OK?', default: 
 
 针对上述模板，在编译时填入`title`和`body`两个字段，即可得到完整的HTML片段。
 
-在`Vue-cli`中，使用了模板引擎合并库[consolidate.js](https://github.com/tj/consolidate.js/),通过这个库的`render`方法来编写metalsmith的处理函数，从而在渲染的过程中对模板进行处理，具体代码如下：
+在`Vue-cli`中，使用了模板引擎合并库[consolidate.js](https://github.com/tj/consolidate.js/)，通过这个库的`render`方法来编写metalsmith的处理函数，从而在渲染的过程中对模板进行处理，具体代码如下：
 
 ```javascript
 exports.handlebars.render = function(str, options, fn) {
@@ -113,7 +113,7 @@ exports.handlebars.render = function(str, options, fn) {
 };
 ```
 
-因此，他可以利用已经安装好的handlebar模板引擎来注册helper，从而进行模板的处理。
+因此，它可以利用已经安装好的handlebars模板引擎来注册helper，从而进行模板的处理。
 
 # 总结
 

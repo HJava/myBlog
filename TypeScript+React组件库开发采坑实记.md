@@ -4,7 +4,7 @@
 
 本文主要内容为：
 
-- `tsconfig.js`配置中遇到的问题
+- `tsconfig.json`配置中遇到的问题
 - 选择TypeScript Loader遇到的问题
 - Webpack遇到的问题
 
@@ -62,15 +62,15 @@ module.exports = {
 
 ### 使用awesome-typescript-loader
 
-**推荐使用此loader来编译TypeScript，速度相较于ts-loader来说，肉眼可见的快。**
+**推荐使用此loader来编译TypeScript，速度相较于ts-loader来说，肉眼可见地快。**
 
-在使用awesome-typescript-loader时，在Stack Overflow的回答中说这个插件会将`tsconfig.json`中的配置文件自动添加到Webpack中。经过实践发现，当绝对路径最终引用的文件是一个Interface时，只需要在`tsconfig.js`中进行指定即可找到相对应文件。
+在使用awesome-typescript-loader时，在Stack Overflow的回答中说这个插件会将`tsconfig.json`中的配置文件自动添加到Webpack中。经过实践发现，当绝对路径最终引用的文件是一个Interface时，只需要在`tsconfig.json`中进行指定即可找到相对应文件。
 
 当绝对路径最终引用的文件是一个Function时，如果不指定webpack alias字段，则会出现相关错误，如`Module not found: Error: Can't resolve 'Utils/handle-url'`。需要解决此问题，只需要在webpack alias中添加相同配置的alias即可解决。
 
 ## Webpack支持ts/tsx后缀
 
-需要让Webpack支持ts/tsx后缀，需要在`extension`字段中添加相对应的值，具体如下：
+需要让Webpack支持ts/tsx后缀，需要在`resolve.extensions`字段中添加相对应的值，具体如下：
 
 ```json
 {
@@ -78,7 +78,7 @@ module.exports = {
 }
 ```
 
-**注：需要增加的字段都需要带上'.'，否则Webpack仍然不识别。**
+**注：需要增加的后缀都需要带上'.'，否则Webpack仍然不识别。**
 
 ## 无法解析tsx文件
 
@@ -92,11 +92,11 @@ module.exports = {
 }
 ```
 
-## 无法找到@types/csstypes
+## 无法找到csstype
 
-在编译时，出现无法找到@types/csstypes错误，具体错误内容为`Cannot find module 'csstype'.`。
+在编译时，出现无法找到csstype错误，具体错误内容为`Cannot find module 'csstype'.`。
 
-需要解决此问题，需要增加`tsconfig.json`中的`jsx`相对应的值，具体如下：
+需要解决此问题，需要增加`tsconfig.json`中的`moduleResolution`相对应的值，具体如下：
 
 ```json
 {
@@ -110,8 +110,8 @@ module.exports = {
 
 需要解决此问题，需要增加指定的Interface，格式如下：
 
-```typscript
-Interface ObjInterface {
+```typescript
+interface ObjInterface {
     [key: string]:string
 }
 ```

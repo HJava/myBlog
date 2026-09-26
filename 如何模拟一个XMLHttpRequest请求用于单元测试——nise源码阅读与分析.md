@@ -2,7 +2,7 @@
 
 在我们进行单元测试的过程中，如果我们需要对一些HTTP接口进行相关的业务测试，那么我们就需要来模拟HTTP请求的发送与响应，否则我们就无法完成测试的闭环。
 
-目前，有许许多多的测试框架都提供了模拟HTTP请求相关的一些流程功能，我们在这边文章中将会讲到的，就是我们在上一篇关于单元测试的博客[提高代码质量——使用Jest和Sinon给已有的代码添加单元测试](https://juejin.im/post/5ad75f16f265da50602c597b)中提到的Sinon中引用的HTTP模拟框架[nise](https://github.com/sinonjs/nise)。
+目前，有许许多多的测试框架都提供了模拟HTTP请求相关的一些流程功能，我们在这篇文章中将会讲到的，就是我们在上一篇关于单元测试的博客[提高代码质量——使用Jest和Sinon给已有的代码添加单元测试](https://juejin.im/post/5ad75f16f265da50602c597b)中提到的Sinon中引用的HTTP模拟框架[nise](https://github.com/sinonjs/nise)。
 
 本文的目标是让读者能够通过这篇文章，知道一个成熟的测试框架是如何来模拟一个HTTP的实现，并且与业务代码进行结合，辅助进行测试。本文内容相对较为简单，基本没有难度，作为一个知识面扩充建议读者快速略读。
 
@@ -16,7 +16,7 @@
 
 > fake XHR and Server.
 
-nise在Github上面的介绍很简单，虽然只有四个单词，但是却很精确的说明了这个库的含义——构造一个模拟的XHR和Server对象，用来替换原生的对象用来满足测试需求。
+nise在GitHub上面的介绍很简单，虽然只有四个单词，但是却很精确的说明了这个库的含义——构造一个模拟的XHR和Server对象，用来替换原生的对象以满足测试需求。
 
 它是[Sinon.js](http://sinonjs.org/)的一部分，用来处理HTTP相关测试问题。
 
@@ -38,13 +38,13 @@ module.exports = {
 };
 ```
 
-我们在使用时，只需调用`userFakeXMLHttpRequest`方法，即可将原生的XHR对象替换成nise提供的XHR对象。在测试完成后，我们再调用返回的`restore`方法，这样我们就恢复了原生的XHR对象。
+我们在使用时，只需调用`useFakeXMLHttpRequest`方法，即可将原生的XHR对象替换成nise提供的XHR对象。在测试完成后，我们再调用返回的`restore`方法，这样我们就恢复了原生的XHR对象。
 
-返回的模拟HXR对象还有部分API接口可以调用，这部分我们将在下一节——nise结构中进行介绍。
+返回的模拟XHR对象还有部分API接口可以调用，这部分我们将在下一节——nise结构中进行介绍。
 
 ## nise结构
 
-### 构造函数——FakeXmlHttpRequest
+### 构造函数——FakeXMLHttpRequest
 
 ```javascript
 // 构造函数，用来存储请求相关的数据如请求状态、请求头等
@@ -114,13 +114,13 @@ extend(FakeXMLHttpRequest.prototype, sinonEvent.EventTarget, {
     
     uploadError: function uploadError(error) {} // 上传失败触发事件
     
-    overrideMimeType: function overrideMimeType(type) {} // 覆盖mineType
+    overrideMimeType: function overrideMimeType(type) {} // 覆盖mimeType
 });
 ```
 
 # nise是如何与业务代码结合，辅助测试
 
-通过上面的源码介绍我们可以知道：nise是通过完全模拟一个模拟的XHR对象，然后再使用这个模拟的XHR对象来替换全局的XHR对象。
+通过上面的源码介绍我们可以知道：nise是通过完全模拟一个XHR对象，然后再使用这个模拟的XHR对象来替换全局的XHR对象。
 
 而我们在进行HTTP相关测试时，参数是由我们传入的，因此不需要进行验证。所以我们最终需要验证的其实是callback中的处理逻辑和结果。因此，我们可以通过以下一个示例来看下它如何与业务代码进行结合。这个示例是在上一篇博客中出现过的示例：
 
@@ -147,13 +147,13 @@ test('user', () => {
 
 nise通过一个非常常规的方法——模拟一个XHR对象并且实现XHR对象的所有功能来完成针对HTTP请求进行记录的功能。我们再通过nise记录的数据，组合其他的单元测试框架来对业务代码进行测试。
 
-nise的源码只有600余行，而且非常简单易懂。我将原有代码folk一份并加上了部分注释，有兴趣的同学可以看看，具体地址见[此处](https://github.com/HJava/nise/blob/master/lib/fake-xhr/index.js)。
+nise的源码只有600余行，而且非常简单易懂。我将原有代码fork一份并加上了部分注释，有兴趣的同学可以看看，具体地址见[此处](https://github.com/HJava/nise/blob/master/lib/fake-xhr/index.js)。
 
 
 # 附录
 
 - [Sinon.js](http://sinonjs.org/)
 - [nise](https://github.com/sinonjs/nise)
-- [我folk的nise](https://github.com/HJava/nise/blob/master/lib/fake-xhr/index.js)
+- [我fork的nise](https://github.com/HJava/nise/blob/master/lib/fake-xhr/index.js)
 
 

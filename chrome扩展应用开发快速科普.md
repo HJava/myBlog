@@ -129,7 +129,7 @@ chrome扩展应用由很多部分组成，其中主要模块为：
 | permissions              | 扩展应用所需权限       | 权限列表见[此处](https://developer.chrome.com/apps/declare_permissions)。申请权限后，可以使用chrome对象来进行访问该权限提供的API接口。我所开发的扩展应用主要是使用到了右键菜单和存储权限 |
 | content_scripts          | Content Script文件     | matches字段表示Content Script文件生效的域名                  |
 | options_page             | Options文件            |                                                              |
-| web_accessible_resources | 扩展需要访问的本地资源 | 只用列举的资源才能够在扩展中通过相对路径方式访问。           |
+| web_accessible_resources | 允许网页访问的扩展资源 | 只有列举的资源才能够被网页（包括Content Script插入到页面中的元素）通过扩展资源路径访问。 |
 
 根据上面的实例文件和具体的属性介绍，相信大家对manifest文件有了一个具体的了解。下面，我们来具体介绍下我们需要使用的各个功能模块。
 
@@ -176,9 +176,9 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
 当我们需要发送我们已经保存的表情时，我们就需要跟页面进行部分功能交互了。这个时候，我们需要使用到`Content Script`。
 
-当我们使用`Content Script`时，我们的执行上下文将会是整个页面。因此，我们可以使用JavaScript来操纵DOM节点，和页面原有的JavaScript进行交互。
+当我们使用`Content Script`时，我们的脚本能够访问整个页面的DOM（但运行在独立的JavaScript环境中，无法直接访问页面原有的JavaScript变量）。因此，我们可以使用JavaScript来操纵DOM节点，并通过PostMessage等方式和页面原有的JavaScript进行交互。
 
-下面，我们通过jQuery来页面注入表情面板，同时使用PostMessage来与原有页面进行数据通信。让我们来看下`favor.js`文件的部分示例代码：
+下面，我们通过jQuery来向页面注入表情面板，同时使用PostMessage来与原有页面进行数据通信。让我们来看下`favor.js`文件的部分示例代码：
 
 ```javascript
 chrome.storage.local.get(['newFavorList'], (items) => {
@@ -265,7 +265,7 @@ chrome.storage.onChanged.addListener((changes) => {
 
 # 总结
 
-我们通过一个简单的表情插件的例子来快速的介绍了chrome扩展应用的各个模块的功能和开发方法。通过这篇文章大家应该知道了chrome扩展应用各个模块的作用和开发的方法。
+我们通过一个简单的表情插件的例子来快速地介绍了chrome扩展应用的各个模块的功能和开发方法。通过这篇文章大家应该知道了chrome扩展应用各个模块的作用和开发的方法。
 
 如果大家想对chrome扩展应用有一个更加深入的了解，那么建议自己动手开发相关的功能。这样才能够对chrome扩展应用的相关逻辑有一个更加清楚的认识。
 

@@ -1,6 +1,6 @@
 # 概述
 
-在我们进行日常的项目开发的过程中，我们经常会遇到使用一些通用的UI组件库如BootStrap、Ant Design等。作为成熟的UI组件库，它能够提供提供一整套UI组件用来满足使用需求，能大大减少开发成本。
+在我们进行日常的项目开发的过程中，我们经常会遇到使用一些通用的UI组件库如Bootstrap、Ant Design等。作为成熟的UI组件库，它能够提供一整套UI组件用来满足使用需求，能大大减少开发成本。
 
 在使用了他人提供的组件库后，我自然就会有兴趣去了解一下别人开发的组件库到底是如何设计的，如何进行相关的组件封装。本文以Ant Design为例，让我们来了解一下目前较为有名的UI组件库是如何设计与实现的？同时，我们又能够有哪些经验可以借鉴？
 
@@ -18,7 +18,7 @@ PS: 博客写一半，手受伤骨折了囧囧囧，后面大部分文字是通�
 
 ## 目录结构
 
-需要了解一个组件的内容，我们应该先从目录接口开始。我们以avatar头像组件为例，目录结构如下图所示：
+需要了解一个组件的内容，我们应该先从目录结构开始。我们以avatar头像组件为例，目录结构如下图所示：
 
 ![](https://file.neixin.cn/pan/im/2/image/AoJzQSUf9obBDtHYoweEELpd80IjDDvx-cO9NXWcNOAeIbddzOshSMxaFbOK4jrU9A?filename=image.png)
 
@@ -30,11 +30,11 @@ PS: 博客写一半，手受伤骨折了囧囧囧，后面大部分文字是通�
 - __tests__，UI组件测试文件，包含当前UI组件相关的单元测试，使用Jest单元测试框架。
 - demo，用来进行展示和用法示例说明的文档
 
-介绍完了目录结构，我们来看下这个插件的具体内容。
+介绍完了目录结构，我们来看下这个组件的具体内容。
 
 ## TSX文件
 
-我们首先来看一下这个插件的TSX文件。这个文件包含了插件的结构和功能。如代码示例示例所示：
+我们首先来看一下这个组件的TSX文件。这个文件包含了组件的结构和功能。如代码示例所示：
 
 ```typescript
 export interface AvatarProps {
@@ -58,7 +58,7 @@ export interface AvatarState {
 }
 ```
 
-我们先看一下声明文件。在你TypeScript声明中我们可以看到：它通过interface定义了props和state两个属性的值。这样可以明确界定传入的属性和内部的属性类型，在代码规范和质量中也能够有一个保证。
+我们先看一下声明文件。在TypeScript声明中我们可以看到：它通过interface定义了props和state两个属性的值。这样可以明确界定传入的属性和内部的属性类型，在代码规范和质量中也能够有一个保证。
 
 下面让我们来看一下具体的组件类。具体示例如下：
 
@@ -130,7 +130,7 @@ export default class Avatar extends React.Component<AvatarProps, AvatarState> {
 }
 ```
 
-从上面的示例代码中我们可以看到，这是一个很常规的React的组件类。它通过传入的属性来判断应该选择哪种方式渲染头像，然后完成组件的渲染过程。同时，在组件渲染完成后，这个组件会根据参数来调整相关的图片大小用于适配。
+从上面的示例代码中我们可以看到，这是一个很常规的React的组件类。它通过传入的属性来判断应该选择哪种方式渲染头像，然后完成组件的渲染过程。同时，在组件渲染完成后，这个组件会根据宽度来调整文字内容的缩放比例用于适配。
 
 这样，一个简单的UI组件就已经基本满足相关的功能了。
 
@@ -138,11 +138,11 @@ export default class Avatar extends React.Component<AvatarProps, AvatarState> {
 
 ### Style文件
 
-还是以Avatar组件为例，具体的样式代码这里就不举例了，只像大家介绍下：Ant Design的样式是通过Less语言来完成的，并且通过TSX文件来进行引入。
+还是以Avatar组件为例，具体的样式代码这里就不举例了，只向大家介绍下：Ant Design的样式是通过Less语言来完成的，并且通过TSX文件来进行引入。
 
 ### Test文件
 
-Test文件通过[enzyme](https://github.com/airbnb/enzyme)来对React组件进行测试。我们简单介绍以下enzyme，这是一个对React组件进行测试的JavaScript框架，能够提供mount等相关API接口来对组件选人和相关的数据更新操作进行测试。
+Test文件通过[enzyme](https://github.com/airbnb/enzyme)来对React组件进行测试。我们简单介绍一下enzyme，这是一个对React组件进行测试的JavaScript框架，能够提供mount等相关API接口来对组件渲染和相关的数据更新操作进行测试。
 
 我们选取一部分测试示例如下：
 
@@ -184,7 +184,7 @@ describe('Avatar Render', () => {
 
 其实UI组件与我们自己开发的React组件没有什么太大的区别，只是一个提供了部分UI和功能的第三方组件而已。想明白了这点，我们就能知道，我们开发的组件与第三方UI组件的交互就是通过Props的方式。
 
-以上面的Avatar组件为例，我们给组件传递`sharp`, `size`，`src`等字段，Avatar组件收到相关数据后，在内部进行相关的处理，最终返回一个React组件。具体示例如下：
+以上面的Avatar组件为例，我们给组件传递`shape`, `size`，`src`等字段，Avatar组件收到相关数据后，在内部进行相关的处理，最终返回一个React组件。具体示例如下：
 
 ```typescript
 import Avatar from './avatar/';
@@ -193,7 +193,7 @@ class Container extends React.Component {
     render() {
         return (
             <div>
-                <Avatar sharp="circle"  size="large"  src="https://www.baidu.com">Avatar!!</Avatar>
+                <Avatar shape="circle"  size="large"  src="https://www.baidu.com">Avatar!!</Avatar>
             </div>
         );
     }
@@ -223,11 +223,11 @@ Ant Design中每一个UI组件的目录结构都如前几章中所述。拥有�
 
 Ant Design的每一个组件都可以被独立引用，引用方式如下：
 
-```javacript
+```javascript
 import Button from 'antd/lib/button';
 ```
 
-我们在使用第三方UI组件库时，通常不会使用到上面所有的组件，而是经常使用到部分组件。因此我们在设计UI组件库时，处于文件大小的考虑，我们也应该保证每个UI组件都互不依赖（同一层级的组件，排除本身业务上就有依赖关系的组件），做到不使用的组件不引入，减小业务方文件大小。
+我们在使用第三方UI组件库时，通常不会使用到上面所有的组件，而是经常使用到部分组件。因此我们在设计UI组件库时，出于文件大小的考虑，我们也应该保证每个UI组件都互不依赖（同一层级的组件，排除本身业务上就有依赖关系的组件），做到不使用的组件不引入，减小业务方文件大小。
 
 ### 测试覆盖
 

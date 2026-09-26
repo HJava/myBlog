@@ -17,12 +17,12 @@
 
 # utfx.js API简介
 
-在进行具体的代码详解之前，我们先来了解下我们需要介绍的库——utfx.js。我们只有了解了这个库的使用方法，我们才能够更好的理解源码。
+在进行具体的代码详解之前，我们先来了解下我们需要介绍的库——utfx.js。我们只有了解了这个库的使用方法，我们才能够更好地理解源码。
 
-utfx.js代码不多，一共只有八个API接口，分别为：
+utfx.js代码不多，一共只有九个API接口，分别为：
 
 - encodeUTF8：将UTF-8编码的字符串code码转换为二进制bytes。
-- decodeUTF8：将UTF-8编码的二进制bytes解码城字符串code码。
+- decodeUTF8：将UTF-8编码的二进制bytes解码成字符串code码。
 - UTF16toUTF8：将UTF-16的字符转换为UTF-8的code码。
 - UTF8toUTF16：将UTF-8的code码转换为UTF-16的字符。
 - encodeUTF16toUTF8：将UTF-16编码的字符转换为UTF-8编码的bytes。
@@ -37,17 +37,17 @@ utfx.js代码不多，一共只有八个API接口，分别为：
 
 下面让我们来看下如何将UTF-16编码的数据转换为UTF-8编码的数据。
 
-当我们需要把UTF-16的数据转换为UTF-8编码的数据时，最好的方法肯定是将UTF-16编码的数据转换为通用的Unicode码，在进行UTF-8编码。我们通过UTF16toUTF8和encodeUTF8方法的代码来进行具体解析。
+当我们需要把UTF-16的数据转换为UTF-8编码的数据时，最好的方法肯定是将UTF-16编码的数据转换为通用的Unicode码，再进行UTF-8编码。我们通过UTF16toUTF8和encodeUTF8方法的代码来进行具体解析。
 
 ## UTF16toUTF8
 
-这个函数名看上去是直接将UTF-16编码的bytes数据转换为UTF-8编码的的Bytes数据。其实是，**将UTF-16编码的bytes数据转换为Unicode对应的二进制数据**。
+这个函数名看上去是直接将UTF-16编码的bytes数据转换为UTF-8编码的Bytes数据。其实是，**将UTF-16编码的bytes数据转换为Unicode对应的二进制数据**。
 
 ```javascript
 /**
  * UTF16数据转换到Unicode数据
- * @param src 数据源，类型为Function，调用一次返回1 Byte数据，如果到达字符串末尾则返回null
- * @param dst 处理函数，类型为Function，得到的Bytes作为参数传递给dst函数
+ * @param src 数据源，类型为Function，调用一次返回一个UTF-16码元（2 Byte），如果到达字符串末尾则返回null
+ * @param dst 处理函数，类型为Function，得到的Unicode码点作为参数传递给dst函数
  */
 utfx.UTF16toUTF8 = function (src, dst) {
     var c1, c2 = null;
@@ -82,7 +82,7 @@ utfx.UTF16toUTF8 = function (src, dst) {
 ```javascript
 /**
  * Unicode数据转换为UTF-8数据
- * @param src 数据源，类型为Function，调用一次返回1 Byte数据，如果到达字符串末尾则返回null
+ * @param src 数据源，类型为Function，调用一次返回一个Unicode码点，如果到达字符串末尾则返回null
  * @param dst 处理函数，类型为Function，得到的Bytes作为参数传递给dst函数
  */
 utfx.encodeUTF8 = function (src, dst) {
@@ -129,7 +129,7 @@ utfx.encodeUTF8 = function (src, dst) {
 ```javascript
 /**
  * 根据Unicode编码来计算转换成UTF-8编码后需要的存储长度
- * @param src 数据源，类型为Function，调用一次返回1 Byte数据，如果到达字符串末尾则返回null
+ * @param src 数据源，类型为Function，调用一次返回一个Unicode码点，如果到达字符串末尾则返回null
  */
 utfx.calculateUTF8 = function (src) {
     var cp, l = 0;
@@ -140,16 +140,16 @@ utfx.calculateUTF8 = function (src) {
 };
 ```
 
-根据上面的的代码和UTF-8的编码规范，我们就能够很容易理解这种宽度计算的方法。
+根据上面的代码和UTF-8的编码规范，我们就能够很容易理解这种宽度计算的方法。
 
 ## calculateUTF16asUTF8
 
 该方法是通过UTF16的数据来计算转换为Unicode码和转换为UTF-8编码后所占存储长度。
 
-```javacript
+```javascript
 /**
  * 根据UTF-16编码的Bytes来计算转换为Unicode的长度和转换成UTF-8编码后需要的存储长度
- * @param src 数据源，类型为Function，调用一次返回1 Byte数据，如果到达字符串末尾则返回null
+ * @param src 数据源，类型为Function，调用一次返回一个UTF-16码元（2 Byte），如果到达字符串末尾则返回null
  */
 utfx.calculateUTF16asUTF8 = function (src) {
     var n = 0, l = 0;
@@ -162,25 +162,25 @@ utfx.calculateUTF16asUTF8 = function (src) {
 
 该方法通过之前介绍的将UTF-16编码转换为Unicode码的方法获取到Unicode数据，再进行计算，返回了Unicode码的长度和UTF-8编码后长度。
 
-# window.TextEncoder与Window.TextDecoder
+# window.TextEncoder与window.TextDecoder
 
-这是两个处在实验性的新构造函数，通过创建编码器（`TextEncode`对象）和解码器（`TextDecode`对象）来实现JavaScript中string类型与UTF-8编码数据中的互相转换。
+这是两个处在实验性的新构造函数，通过创建编码器（`TextEncoder`对象）和解码器（`TextDecoder`对象）来实现JavaScript中string类型与UTF-8编码数据中的互相转换。
 
-构造方法将会返回一个UTF-8编码的，使用方法如下：
+构造方法将会返回一个UTF-8编码的编码器或解码器，使用方法如下：
 
 ```javascript
 let encoder = new TextEncoder();
 let decoder = new TextDecoder();
 
-let unit8Array = encoder.encode('a'); // 返回一个Unit8Array类型——[97]
-let str = decoder.decode(arr); // 返回一个值为'a'的字符串
+let unit8Array = encoder.encode('a'); // 返回一个Uint8Array类型——[97]
+let str = decoder.decode(unit8Array); // 返回一个值为'a'的字符串
 ```
 
-目前，这项新技术的的兼容性仍然存在很大问题，只有Chrome 38、Firefox 19以及Opera 25以上才支持，其他主流的浏览器如IE和Safari都还没有任何支持，因此在生产环节中需要慎重使用。
+目前，这项新技术的兼容性仍然存在很大问题，只有Chrome 38、Firefox 19以及Opera 25以上才支持，其他主流的浏览器如IE和Safari都还没有任何支持，因此在生产环境中需要慎重使用。
 
 # 总结
 
-本文对实现了Unicode中UTF-8和UTF-16这两种编码方式的库——[utfx.js](https://github.com/dcodeIO/utfx)进行了部分代码分析。通过看到具体的代码实现，相信大家应该能够更加好的理解这两种编码方式的具体规范，以及对应的使用方式和场景。
+本文对实现了Unicode中UTF-8和UTF-16这两种编码方式的库——[utfx.js](https://github.com/dcodeIO/utfx)进行了部分代码分析。通过看到具体的代码实现，相信大家应该能够更好地理解这两种编码方式的具体规范，以及对应的使用方式和场景。
 
 
 

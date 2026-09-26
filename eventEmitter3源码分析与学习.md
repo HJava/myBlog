@@ -3,10 +3,10 @@
 
 在具体的一些业务场景中，第三方的自定义事件能够在层级较多，函数调用困难以及需要多个地方响应的时候有着其独特的优势——调用方便，避免多层嵌套，降低组件间耦合性。
 
-这篇文章所提到的EventEmitter3，就是一个典型的第三方事件库，能够让我们通过自定义的实践来实现多个函数与组件间的通信。
+这篇文章所提到的EventEmitter3，就是一个典型的第三方事件库，能够让我们通过自定义的事件来实现多个函数与组件间的通信。
 
 # 整体结构图
-EventEmitter3的设计较为的简单，具体结构可以看下图所示。
+EventEmitter3的设计较为简单，具体结构可以看下图所示。
 
 ![](https://raw.githubusercontent.com/HJava/blog_picture/master/EventEmitter%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/eventEmitter%E7%BB%93%E6%9E%84.png)
 
@@ -20,14 +20,14 @@ EventEmitter3的设计较为的简单，具体结构可以看下图所示。
 	    this.context = context;
 	    this.once = once || false;
 	}
-从类`EE`的代码中我们能够很明确的了解到，第一个参数为回调函数，第二个参数为回调函数的上下文，第三个参数是一个`once`的标志位。由于代码简单，在这里就简单介绍下了。
+从类`EE`的代码中我们能够很明确地了解到，第一个参数为回调函数，第二个参数为回调函数的上下文，第三个参数是一个`once`的标志位。由于代码简单，在这里就简单介绍下了。
 
 ## Prototype属性
 ### events
-该方法用于存储eventEmitter的整个事件名称与回调函数的集合，初始值为undefined。
+该属性用于存储eventEmitter的整个事件名称与回调函数的集合，初始值为undefined。
 
 ## Prototype方法
-### eventName
+### eventNames
 - 作用：返回当前已经注册的事件名称的列表
 - 参数：无
 
@@ -45,20 +45,20 @@ EventEmitter3的设计较为的简单，具体结构可以看下图所示。
 - 参数：event——事件名，fn——回调函数，context——上下文
 
 ### once
-- 作用：类似`on`,区别在于该函数只会触发一次
+- 作用：类似`on`，区别在于该函数只会触发一次
 - 参数：event——事件名，fn——回调函数，context——上下文
 
 
-### removeListner
+### removeListener
 - 作用：移除某个事件的监听函数
 - 参数：event——事件名，fn——事件监听函数，context——只移除上下文匹配的事件监听函数，once——只移除类型匹配的事件监听函数
 
-### removeAllListener
-- 作用：移除某个时间的所有监听函数
+### removeAllListeners
+- 作用：移除某个事件的所有监听函数
 - 参数：event——事件名
 
 # 学习思路
-下面我们将从添加监听函数， 事件触发与删除监听函数来进行具体的代码分析，从而了解该库的实现思路。
+下面我们将从添加监听函数、事件触发与删除监听函数来进行具体的代码分析，从而了解该库的实现思路。
 ## 事件对象
 具体代码如下所示：
 
@@ -113,7 +113,7 @@ function EE(fn, context, once) {
 当我们向事件E添加函数F时，会调用`on`方法，此时on方法会检查eventEmitter中prototype属性events的E属性。
 
 - 当这个属性为`undefined`时，直接将该函数所在的事件对象赋值给evt属性。
-- 当该属性当前值为一个对象且其函数fn不等于函数F时，则会将其转换为一个包含这两个事件对象的事件对象数组。
+- 当该属性当前值为一个事件对象（即存在`fn`属性）时，则会将其转换为一个包含这两个事件对象的事件对象数组。
 - 当这个属性已经是一个对象数组时，则直接通过`push`方法向数组中添加对象。
 
 `prefix`是用来判断`Object.create()`方法是否存在，如果存在则直接调用该方法来创建属性，否则通过在属性前添加`~`来避免覆盖原有属性。
@@ -204,7 +204,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
                 events.push(listeners);
             }
         } else {
-            //由于篇幅原因省去便利listeners属性查找函数删除的代码
+            //由于篇幅原因省去遍历listeners属性查找函数删除的代码
         }
     }
 
@@ -220,7 +220,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
     return this;
 };
 ```
-`removeListener`函数实现较为简单。当我们需要移除事件E的某个函数时，它使用一个`event`属性来保存不需要被移除的事件监听对象，然后便利整个事件监听数组（单个时为对象），并且最后将`event`属性的值赋值给E属性从而覆盖掉原有的属性，达到删除的目的。
+`removeListener`函数实现较为简单。当我们需要移除事件E的某个函数时，它使用一个`events`变量来保存不需要被移除的事件监听对象，然后遍历整个事件监听数组（单个时为对象），并且最后将`events`变量的值赋值给E属性从而覆盖掉原有的属性，达到删除的目的。
 
 ## 其他
 该库中还有一些其他的函数，由于对整个库的理解不产生太大影响，因此没有在此进行讲解，有需要的可以前往我的[github仓库](https://github.com/HJava/eventemitter3)进行查看。

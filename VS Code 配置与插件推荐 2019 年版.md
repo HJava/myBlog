@@ -1,12 +1,12 @@
 ## 概述
 
-距离之前给大家介绍的 VS Code 插件已经过去了一年多了，在这之间有不少插件已经更新消失，也有不少的新的好用的新的插件，让我们来看下有哪些配置和插件能够提高我们的效率。
+距离之前给大家介绍的 VS Code 插件已经过去了一年多了，在这之间有不少插件已经更新消失，也有不少好用的新插件，让我们来看下有哪些配置和插件能够提高我们的效率。
 
 本次我们推荐的插件都是基于当前最新版本的 VS Code，即 1.31 版本。
 
 ## VS Code 配置
 
-### `setting.json` 设置
+### `settings.json` 设置
 
 首先，我们来看下 VS Code 推荐的设置属性。下面是我自己的配置文件：
 
@@ -53,8 +53,8 @@
   ![image.png](https://user-gold-cdn.xitu.io/2019/2/25/1692499e10236126?w=667&h=151&f=png&s=42061)
 - `git.autofetch`，这个属性可以让 VS Code 自动去检测 Git 远端是否有发生新的更改，推荐设置为`true`。
 - `editor.cursorWidth`，这个属性是用来设置光标宽度的，推荐值为`2`。在设置此属性之前，需要先设置属性`editor.cursorStyle`的值为`line`。
-- `editor.suggestSelection`，这个属性是用来设置建议值的，就是我们在输入`co`时，编辑器提示我们`const`这个功能。推荐设置为`first`——即每次默认选中推荐值第一个，比如你输入`co`，推荐值为`const`和`constant`（按顺序），那么就会选择`const`。当然，我也推荐设置为`recentlyUsedByPrefix`，即上次你选择或者输入过什么，这次就默认选中什么，比如你输入`co`，推荐值为`const`和`constant`（按顺序），上次你选择了`constant`，这次就还是默认选中`cosntant`。
-- `editor.tabCompletion`，这个属性是表示在出现推荐值时，按下`Tab`键是否自动填入最佳推荐值，推荐设置为`true`。
+- `editor.suggestSelection`，这个属性是用来设置建议值的，就是我们在输入`co`时，编辑器提示我们`const`这个功能。推荐设置为`first`——即每次默认选中推荐值第一个，比如你输入`co`，推荐值为`const`和`constant`（按顺序），那么就会选择`const`。当然，我也推荐设置为`recentlyUsedByPrefix`，即上次你选择或者输入过什么，这次就默认选中什么，比如你输入`co`，推荐值为`const`和`constant`（按顺序），上次你选择了`constant`，这次就还是默认选中`constant`。
+- `editor.tabCompletion`，这个属性是表示在出现推荐值时，按下`Tab`键是否自动填入最佳推荐值，推荐设置为`on`。
 - `editor.codeActionsOnSave`中的`source.organizeImports`属性，这个属性能够在保存时，自动调整 import 语句相关顺序，能够让你的 import 语句按照字母顺序进行排列，推荐设置为`true`。
 
 ### 代码片段
@@ -107,7 +107,7 @@
 
 ## 插件
 
-推荐设置属性我们介绍的差不多了，下面我们来说下推荐的插件。
+推荐设置属性我们介绍得差不多了，下面我们来说下推荐的插件。
 
 ### Auto Rename Tag
 
@@ -129,7 +129,7 @@
 
 插件市场说明见[此处](https://marketplace.visualstudio.com/items?itemName=joelday.docthis)。
 
-这个插件的作用是能够让你快速的对类和函数添加注释。通过按两次 `Ctrl+Alt+D` 按键可以快速增加注释。具体如下图所示。
+这个插件的作用是能够让你快速地对类和函数添加注释。通过按两次 `Ctrl+Alt+D` 按键可以快速增加注释。具体如下图所示。
 
 ![](https://user-gold-cdn.xitu.io/2019/2/25/169249613eabf528?w=1422&h=1078&f=gif&s=194610)
 
@@ -137,7 +137,7 @@
 
 插件市场说明见[此处](https://marketplace.visualstudio.com/items?itemName=xyz.plsql-language)。
 
-这个插件的作用是能够让 VS Code 支持 SQL 语言。具体如下图所示。
+这个插件的作用是能够让 VS Code 支持 PL/SQL 语言。具体如下图所示。
 
 ![](https://user-gold-cdn.xitu.io/2019/2/25/169249613ebe0b12?w=1000&h=717&f=gif&s=82899)
 
@@ -145,7 +145,7 @@
 
 插件市场说明见[此处](https://marketplace.visualstudio.com/items?itemName=Shan.code-settings-sync)。
 
-这个插件的作用是让你能够把你对于 VS Code 的配置和插件都同步到 Gist 上面，能够让你在多个电脑的 VS Code 进行同步。
+这个插件的作用是让你能够把你对于 VS Code 的配置和插件都同步到 Gist 上面，能够让你在多台电脑的 VS Code 之间进行同步。
 
 ### vscode-icons
 
@@ -169,6 +169,6 @@
 
 ## 总结
 
-VS Code 最近这一年更新了不少的好用的配置和插件，但是在性能上却仍然保持了一贯的优秀的水平。从目前来看，VS Code 是目前免费的编辑器中面配置最简单的开发工具。
+VS Code 最近这一年更新了不少的好用的配置和插件，但是在性能上却仍然保持了一贯的优秀的水平。从目前来看，VS Code 是目前免费的编辑器中配置最简单的开发工具。
 
 大家如果有什么好的配置和插件，也欢迎大家留言交流。

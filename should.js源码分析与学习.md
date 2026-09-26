@@ -1,5 +1,5 @@
 # 背景
-为了研究与学习某些测试框架的工作原理，同时也为了完成培训中实现一个简单的测试框架的原因，我对should.js的代码进行了学习与分析，现在与大家来进行交流下。
+为了研究与学习某些测试框架的工作原理，同时也为了完成培训中实现一个简单的测试框架的任务，我对should.js的代码进行了学习与分析，现在与大家来进行交流下。
 
 # 目录
 - ext
@@ -12,7 +12,7 @@
 其中`ext`为文件夹，其余为js文件。
 
 # 结构
-其中`should.js`为整个项目入口，`asssertion.js`为should.js中的类，负责对测试信息进行记录。`assertion-error.js`为should.js定义了一个错误类，负责存储错误信息。`config.js`中存储了一些should.js中的一些配置信息。`util.js`中则定义了一些项目中常用的工具函数。
+其中`should.js`为整个项目入口，`assertion.js`为should.js中的类，负责对测试信息进行记录。`assertion-error.js`为should.js定义了一个错误类，负责存储错误信息。`config.js`中存储了should.js中的一些配置信息。`util.js`中则定义了一些项目中常用的工具函数。
 ## `should.js`
 ```javascript
 var should = function should(obj) {
@@ -92,7 +92,7 @@ function Assertion(obj) {
 }
 ```
 
-`assertion.js`中定义了一个Assertion类，其中any为should.js中的`any`方法的标志位，而not则为其`not`方法的标志位。
+`assertion.js`中定义了一个Assertion类，其中anyOne为should.js中的`any`方法的标志位，而negate则为其`not`方法的标志位。
 
 ```javascript
 Assertion.add = function(name, func) {
@@ -164,7 +164,7 @@ Assertion.addChain = function(name, onCall) {
 
 同时，Assertion类还支持别名功能，`alias`方法使用Object对象的`getOwnPropertyDescriptor`方法来对属性是否存在进行判断，并调用`defineProperty`进行赋值。
 
-`Assertion`类在原型链中定义了`assert`方法，用来对各级限制条件进行判断。`assert`方法与普通方法不同，它并未采用参数来进行一些参数的传递，而是通过`assert`方法所在的`Assertion`对象的`params`属性来进行参数的传递。因为在`Assertion`对象中存储了相关的信息，使用这个方法来进行参数传递方便在各级中`assert`函数的调用方便。具体使用方法我们将在扩展的分析时提到。
+`Assertion`类在原型链中定义了`assert`方法，用来对各级限制条件进行判断。`assert`方法与普通方法不同，它并未采用参数来进行一些参数的传递，而是通过`assert`方法所在的`Assertion`对象的`params`属性来进行参数的传递。因为在`Assertion`对象中存储了相关的信息，使用这个方法来进行参数传递，方便了各级中`assert`函数的调用。具体使用方法我们将在扩展的分析时提到。
 
 ```javascript
 assert: function(expr) {
@@ -199,7 +199,7 @@ fail: function() {
 在此文件中，定义了assertion中抛出来的错误，同时在其中定义了一些信息存储的函数例如`message`和`detail`等，能够让错误在被捕获的时候带上一些特定的信息从而方便进行判断与处理。由于实现较为简单，因此在此就不贴出代码，需要了解的人可以自己去查阅should.js的源码。
 
 ## `ext/bool.js`
-下面简单介绍一个`Assertion`的扩展的工作方式。让我们能够对should.js的工作原理有一个更加深刻的理解。
+下面简单介绍一个`Assertion`的扩展的工作方式，让我们能够对should.js的工作原理有一个更加深刻的理解。
 
 ```javascript
 module.exports = function(should, Assertion) {
@@ -257,17 +257,17 @@ should.use = function (f) {
 	});
 
 以下两段代码在结果上是一模一样的效果：		
-	'1'.shoud.be.a.Number();
+	'1'.should.be.a.Number();
 	'1'.should.be.be.be.be.a.a.a.a.Number();
 
 ## `should.js`的实现方式有哪些值得借鉴的地方？
 1. `should.js`中，通过将一些语义词添加为属性值并返回`Assertion`对象本身，因此有效解决了链式调用的问题。
-2. 通过`Asseriton`对象的属性来进行参数的传递，而不是通过函数参数，从而有效避免了函数调用时参数的传递问题以及多层调用时结构的复杂。
-3. `should.js`通过扩展的方式来添加其判断的函数，保证了良好的扩展性，避免了代码耦合在一起，通过也为其他人编写更多的扩展代码提供了接口。
+2. 通过`Assertion`对象的属性来进行参数的传递，而不是通过函数参数，从而有效避免了函数调用时参数的传递问题以及多层调用时结构的复杂。
+3. `should.js`通过扩展的方式来添加其判断的函数，保证了良好的扩展性，避免了代码耦合在一起，同时也为其他人编写更多的扩展代码提供了接口。
 4. `should.js`通过extend方法，让`should(obj)`与`obj.should`两种方式达到了相同的效果。通过在`defineProperty`中定义should属性并且在回调函数中用`should(obj)`的方式来获取`obj`对象。
-5. 通过抛出错误而不是返回布尔值的方式来通知用户，能够更加明显的通知用户，也方便向上抛出异常进行传递。
+5. 通过抛出错误而不是返回布尔值的方式来通知用户，能够更加明显地通知用户，也方便向上抛出异常进行传递。
 
 # 总结
-总的来说，`should.js`是一个比较小而精的测试框架，他能够满足在开发过程中所需要的大部分测试场景，同时也支持自己编写扩展来强化它的功能。在设计上，这个框架使用了不少巧妙的方法，避免了一些复杂的链式调用与参数传递等问题，而且结构清晰，比较适合进行阅读与学习。
+总的来说，`should.js`是一个比较小而精的测试框架，它能够满足在开发过程中所需要的大部分测试场景，同时也支持自己编写扩展来强化它的功能。在设计上，这个框架使用了不少巧妙的方法，避免了一些复杂的链式调用与参数传递等问题，而且结构清晰，比较适合进行阅读与学习。
 
 

@@ -4,7 +4,7 @@
 
 同时，因为MDN中的相关文档缺乏相关逻辑性，所以不容易理解。本文将通过项目中常见的数据存储和操作需求来进行内容组织。
 
-读者能够通过本文学会在项目中正确的使用`IndexedDB`，给应用带来的本地存储能力，并且避免一些常见的问题。
+读者能够通过本文学会在项目中正确地使用`IndexedDB`，给应用带来本地存储能力，并且避免一些常见的问题。
 
 # 原因：开发者需要在本地进行永久存储
 
@@ -34,7 +34,7 @@
 
 ### 创建或打开数据库
 
-使用`IndexedDB`第一步，就是创建或打开一个数据库。我们使用`window.indexedDB.open(DBName)`这个API来打进行操作。具体示例如下：
+使用`IndexedDB`第一步，就是创建或打开一个数据库。我们使用`window.indexedDB.open(DBName)`这个API来进行操作。具体示例如下：
 
 ```javascript
 const request = window.indexedDB.open('test');
@@ -51,7 +51,7 @@ request.onerror = function(event) {}
 
 调用此接口时，如果当前数据库不存在，则会创建一个新的数据库。
 
-当数据库建立连接时，会返回一个`IDBOpenDBRequest`对象。
+调用此接口会立即返回一个`IDBOpenDBRequest`对象。
 
 在连接建立成功时，会触发`onsuccess`事件，其中函数参数`event`的`target`属性就是`request`对象。
 
@@ -59,15 +59,15 @@ request.onerror = function(event) {}
 
 ### 更新数据库版本号
 
-`window.indexedDB.open`的第二个参数即为版本号。在不指定的情况下，默认版本号为1。具体示例如下:
+`window.indexedDB.open`的第二个参数即为版本号。在不指定的情况下，如果数据库已存在，则以当前版本打开；如果数据库不存在，则默认版本号为1。具体示例如下:
 
 ```javascript
 const request = window.indexedDB.open('test', 2);
 ```
 
-在需要更新数据库的`schema(模式)`时，需要更新版本号。此时我们指定一个高于之前版本的版本号，就会触发`onupgradeneeded`事件。类似的，当此数据库不存在时，也会触发此事件并且将版本更新到置顶版本。
+在需要更新数据库的`schema(模式)`时，需要更新版本号。此时我们指定一个高于之前版本的版本号，就会触发`onupgradeneeded`事件。类似的，当此数据库不存在时，也会触发此事件并且将版本更新到指定版本。
 
-我们需要注意的是，版本号是一个`Unsigned long long`数字，这意味着它可以是一个非常大的整数。但是，它不能是一个小数，否则它将会被转为最近的整数，同时有可能导致`onUpgradeneeded`事件不触发(bug)。
+我们需要注意的是，版本号是一个`Unsigned long long`数字，这意味着它可以是一个非常大的整数。但是，它不能是一个小数，否则它将会被向下取整，同时有可能导致`onupgradeneeded`事件不触发(bug)。
 
 ## 存储空间操作
 
@@ -94,14 +94,14 @@ request.onerror = function (event) {
 
 通过`createObjectStore`能够创建一个存储空间。接受两个参数：
 
-1. 第一个参数，存储空间的名称，即我们上面的`customers`。
+1. 第一个参数，存储空间的名称，即我们上面的`table1`。
 2. 第二个参数，指定存储的`keyPath`值为存储对象的某个属性，这个属性能够在获取存储空间数据的时候当做key值使用。`autoIncrement`指定了`key`值是否自增（当key值为默认的从1开始到2^53的整数时）。
 
 而`createIndex`能够给当前的存储空间设置一个索引。它接受三个参数：
 
 1. 第一个参数，索引的名称。
 2. 第二个参数，指定根据存储数据的哪一个属性来构建索引。
-3. 第三个属性， options对象，其中属性`unique`的值为`true`表示不允许索引值相等。
+3. 第三个参数，options对象，其中属性`unique`的值为`true`表示不允许索引值相等。
 
 ## 数据操作
 
@@ -109,7 +109,7 @@ request.onerror = function (event) {
 
 在`IndexedDB`中，我们也能够使用事务来进行数据库的操作。事务有三个模式（常量已经弃用）：
 
-- `readOnly`，只读。
+- `readonly`，只读。
 - `readwrite`，读写。
 - `versionchange`，数据库版本变化。
 
@@ -119,7 +119,7 @@ request.onerror = function (event) {
 const transaction = db.transaction(['customers'], 'readwrite');
 ```
 
-事务函数`transaction`的第一个参数为需要关联的存储空间，第二个可选参数为事务模式。与上面类似，事务成功时也会触发`onsuccess`函数，失败时触发`onerror`函数。
+事务函数`transaction`的第一个参数为需要关联的存储空间，第二个可选参数为事务模式。与上面类似，事务也有对应的回调：事务成功完成时会触发`oncomplete`函数（而不是`onsuccess`），失败时触发`onerror`函数。
 
 事务的操作都是原子性的。
 
@@ -144,7 +144,7 @@ request.onsuccess = function (event) {
 }
 ```
 
-注：`add`方法中的第二个参数key值是指定存储空间中的`keyPath`值，如果`data`中包含`keyPath`值或者此值为自增值，那么可以略去此参数。
+注：`add`方法中的第二个参数为key值，只有在存储空间没有指定`keyPath`时才需要传入；如果存储空间指定了`keyPath`（`data`中包含`keyPath`值）或者此值为自增值，那么可以略去此参数（指定了`keyPath`时再传入此参数会报错）。
 
 ### 查找数据
 
@@ -241,7 +241,7 @@ index.openCursor(boundKeyRange).onsuccess = function(event) {
 
    ​
 
-2. 第二个参数，遍历顺序，指定游标遍历时的顺序和处理相同id（keyPath属性指定字段）重复时的处理方法。改范围通过特定的字符串（`IDBCursor`的常量已经弃用）来获取。其中：
+2. 第二个参数，遍历顺序，指定游标遍历时的顺序和处理相同id（keyPath属性指定字段）重复时的处理方法。该参数通过特定的字符串（`IDBCursor`的常量已经弃用）来获取。其中：
 
    - `next`，从前往后获取所有数据（包括重复数据）
    - `prev`，从后往前获取所有数据（包括重复数据）
@@ -261,7 +261,7 @@ request.onsuccess = function (event) {
     var objectStore = transaction.objectStore('table1');
 
     var lowerBoundOpenKeyRange = IDBKeyRange.lowerBound(1, false);
-    var request = objectStore.openCursor(lowerBoundOpenKeyRange, IDBCursor.PREV);
+    var request = objectStore.openCursor(lowerBoundOpenKeyRange, 'prev');
 
     request.onsuccess = function (event) {
         var cursor = event.target.result;
@@ -280,7 +280,7 @@ request.onsuccess = function (event) {
 
 #### 使用索引
 
-在前面构建数据库时，我们创建了两个索引。现在我们也可以通过索引来进行数据检索。他的本质还是通过之前获取数据的API来进行，只是将原来使用的`keyPath`属性转换成为了索引指定的属性。具体示例如下：
+在前面构建数据库时，我们创建了一个索引。现在我们也可以通过索引来进行数据检索。它的本质还是通过之前获取数据的API来进行，只是将原来使用的`keyPath`属性转换成为了索引指定的属性。具体示例如下：
 
 ```javascript
 var request = window.indexedDB.open('test', 1);
@@ -348,7 +348,7 @@ request.onsuccess = function (event) {
 - 用户清除浏览器缓存
 - 存储空间超过大小限制
 
-此时，需要对错误进行捕获，并且对用户进行提示。此章节不是本文重点，再此略过。
+此时，需要对错误进行捕获，并且对用户进行提示。此章节不是本文重点，在此略过。
 
 # 扩展须知
 
@@ -359,7 +359,7 @@ request.onsuccess = function (event) {
 在`IndexedDB`中，键值对中的`key`值可以接受以下几种类型的值：
 
 - number
-- data
+- date
 - string
 - binary
 - array
@@ -368,7 +368,7 @@ request.onsuccess = function (event) {
 
 ### key path能够接受的数据类型
 
-当一个`key`值变为主键，即`keyPath`时，它的值就只能是以下几种：
+`keyPath`本身只能是一个字符串或字符串数组。通过key path取值时，除了普通对象的属性外，还可以取到以下几种类型值的特定属性（如Blob的`size`、`type`，File的`name`，Array和String的`length`）：
 
 - Blob
 - File
@@ -381,7 +381,7 @@ request.onsuccess = function (event) {
 
 ### value能够接受的数据类型
 
-在`IndexedDB`中，value能够接受ECMA-262中所有的类型的值，例如String，Date，ImageDate等。
+在`IndexedDB`中，value能够接受所有可以被结构化克隆算法（structured clone）处理的值，例如String，Date，ImageData等。
 
 ## 事务相关
 

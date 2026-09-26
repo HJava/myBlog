@@ -1,6 +1,6 @@
 # 背景
 
-在上一篇博客[[译]前端基础知识储备——Promise/A+规范](https://cloud.tencent.com/developer/article/1351114)中，我们介绍了Promise/A+规范的具体条目。在本文中，我们来选择了promiz，让大家来看下一个具体的Promise库的内部代码是如何运作的。
+在上一篇博客[[译]前端基础知识储备——Promise/A+规范](https://cloud.tencent.com/developer/article/1351114)中，我们介绍了Promise/A+规范的具体条目。在本文中，我们选择了promiz，让大家来看下一个具体的Promise库的内部代码是如何运作的。
 
 [promiz](https://github.com/Zolmeister/promiz/blob/master/promiz.js)是一个体积很小的promise库（官方介绍约为913 bytes (gzip)），作为一个ES2015标准中的Promise的polyfill，实现了诸如`resolve`、`all`和`race`等API。
 
@@ -9,7 +9,7 @@
 我们在这里简单回顾一下Promise/A+的主要关键点，如果需要了解详细内容的同学，可以阅读我的上一篇博客。
 
 - Promise有三个状态，分别为`pending`、`fulfilled`和`rejected`，且只能从`pending`到`fulfilled`或者`rejected`，没有其他的流转方式。
-- Promise的返回值是一个新的Promise，原因见上一条。
+- Promise的`then`方法的返回值是一个新的Promise，原因见上一条。
 - 传递给`then`函数的两个回调函数，有且仅有一次机会被执行（即执行了`onfulfilled`就不会执行`onrejected`函数，且只执行一次）。
 
 # 代码实现与分析
@@ -60,8 +60,8 @@ function nextTick(fn) {
 以上代码比较简单，我们简单说明下：
 
 - 在代码中，promiz使用了`setImmediate`、`setTimeout`和`postMessage`这三个方法来执行异步函数，其中：
-  - `setImmedeate`，只有IE实现了该方法，在执行完队列中的代码后立即执行。
-  - `PostMessage`，新增的H5中的方法。
+  - `setImmediate`，只有IE和Node.js实现了该方法，在执行完队列中的代码后立即执行。
+  - `postMessage`，新增的H5中的方法。
   - `setTimeout`，兼容性最佳，可以适用各种场景。
 
 因此，在promiz的这段代码中，有一定的兼容性问题，应该把setTimeout放到最后作为一个兜底策略，否则无法在老浏览器中执行。
@@ -103,7 +103,7 @@ function Deferred(resolver) {
 
 构造函数非常简单，除了声明相关的函数，就只有执行传入的callback而已。当然，如果我们不是链式调用的第一个promise，那么我们会没有`resolver`参数，因此不需要在此执行，我们会在`then`函数执行`resolve`方法。
 
-下面我们来看下上面提到的处理函数`resovle`和`reject`。
+下面我们来看下上面提到的处理函数`resolve`和`reject`。
 
 ```javascript
 self['resolve'] = function (v) {
@@ -153,7 +153,7 @@ self['then'] = function (_fn, _er) {
 }
 ```
 
-在`resolve`和`reject`这两个函数中，都是改变了内部promise的状态，给定了参数值，同时异步触发了fire函数。而`then`方法，则是生成了一个新的`Deferred`对象，并且完成了相关的初始化（执行完then方法我们就会得到这个新生成的`Deferred`对象，也就是一个新的Promise）；当前一个promise到达`resolved`状态时，不需要等待则直接出发resolve方法，`rejected`状态时也一样。那么，让我们来看下fire方法到底是做什么的呢？
+在`resolve`和`reject`这两个函数中，都是改变了内部promise的状态，给定了参数值，同时异步触发了fire函数。而`then`方法，则是生成了一个新的`Deferred`对象，并且完成了相关的初始化（执行完then方法我们就会得到这个新生成的`Deferred`对象，也就是一个新的Promise）；当前一个promise到达`resolved`状态时，不需要等待则直接触发resolve方法，`rejected`状态时也一样。那么，让我们来看下fire方法到底是做什么的呢？
 
 ```javascript
 function fire() {
@@ -248,7 +248,7 @@ function thennable(ref, cb, ec, cn) {
 
 ## 链式调用第一个Promise
 
-当我们声明一个promise式，我们会传入一个`resolver`。此时，整个`Deferred`对象的`state`是0。如果我们在`resolver`里面调用了`resolve`方法，那么我们的`state`就会变成1，然后出发fire函数注册到thenable函数里面的第三个回调函数，从而将值传递给下一个thenable。当thenable的then函数执行完成（即我们看到的Promise后面跟着的then函数执行完成以后），我们的`state`才会变成3，也就是说上一个Promise才会结束，返回一个新的Promise。
+当我们声明一个promise时，我们会传入一个`resolver`。此时，整个`Deferred`对象的`state`是0。如果我们在`resolver`里面调用了`resolve`方法，那么我们的`state`就会变成1，然后触发fire函数注册到thenable函数里面的第三个回调函数，从而将值传递给下一个thenable。当thenable的then函数执行完成（即我们看到的Promise后面跟着的then函数执行完成以后），我们的`state`才会变成3，也就是说上一个Promise才会结束，返回一个新的Promise。
 
 ## 链式调用非第一个Promise
 
@@ -256,9 +256,9 @@ function thennable(ref, cb, ec, cn) {
 
 ## 给`resolve`传递一个Promise
 
-在Promise/A+规范中，如果我们给`resolve`传递一个promise，那么我们的通过`resolve`获取到的值就是传递进去的这个promise返回的值。当然，我们也必须等待作为参数的这个promise处理完成后，才会处理外面的这个promise。
+在Promise/A+规范中，如果我们给`resolve`传递一个promise，那么我们通过`resolve`获取到的值就是传递进去的这个promise返回的值。当然，我们也必须等待作为参数的这个promise处理完成后，才会处理外面的这个promise。
 
-在promiz的代码中，我们如果通过`resolve`接收到一个promise，那么我们在fire函数中就会吧`promise.then`的引用传递给`thenable`函数。在`thenable`函数中，我们会将我们当前promise需要执行的`onfulfilled`和`onrejected`封装成一个函数，传递给作为参数的promise的then函数。因此，当作为参数的promise执行任意结果的回调函数时，就会将参数传递给外层的promise，执行对应的回调函数。
+在promiz的代码中，我们如果通过`resolve`接收到一个promise，那么我们在fire函数中就会把`promise.then`的引用传递给`thenable`函数。在`thenable`函数中，我们会将我们当前promise需要执行的`onfulfilled`和`onrejected`封装成一个函数，传递给作为参数的promise的then函数。因此，当作为参数的promise执行任意结果的回调函数时，就会将参数传递给外层的promise，执行对应的回调函数。
 
 ## 全局执行方法
 
@@ -308,11 +308,11 @@ Deferred.all = function (arr) {
 }
 ```
 
-在`Promise.all`中，我们使用了一个计数器来进行统计，在每一个Promise后面都增加一个then函数用于增加计数。当Promise成功时则计数+1。当整个数组中的Promise都已经进入`resolved`状态时，我们才会执行`thenable`的then函数。如果有一个失败的话，则立即进入reject流程。
+在`Promise.all`中，我们在每一个Promise后面都增加一个then函数，当Promise成功时用其返回值替换数组中对应的元素，并重新统计数组中还剩多少个未完成的Promise（即仍带有`then`的元素）。当整个数组中的Promise都已经进入`resolved`状态时，我们才会用结果数组resolve新创建的Promise。如果有一个失败的话，则立即进入reject流程。
 
 # 总结
 
-从代码设计层面来看，promiz的代码量较少，阅读也较为简单。但是，在某些细节的设计上，promiz还是体现出了较为巧妙的思路，如在处理作为入参的promise时，能够在这个promise后面动态的添加一个`then`函数，从而获取数据给外面的promise。
+从代码设计层面来看，promiz的代码量较少，阅读也较为简单。但是，在某些细节的设计上，promiz还是体现出了较为巧妙的思路，如在处理作为入参的promise时，能够在这个promise后面动态地添加一个`then`函数，从而获取数据给外面的promise。
 
 如果大家有兴趣，建议自己根据本文的说明阅读一遍[源码](https://github.com/Zolmeister/promiz/blob/master/promiz.js)，配合Promise/A+规范来看下是如何实现每一条规范的。
 

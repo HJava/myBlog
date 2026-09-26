@@ -13,7 +13,7 @@
 
 # WebSocket介绍
 
-> **WebSockets** 是一个可以创建和服务器间进行双向会话的高级技术。通过这个API你可以向服务器发送消息并接受基于事件驱动的响应，这样就不用向服务器轮询获取数据了。
+> **WebSockets** 是一个可以创建和服务器间进行双向会话的高级技术。通过这个API你可以向服务器发送消息并接收基于事件驱动的响应，这样就不用向服务器轮询获取数据了。
 
 上面是[MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/WebSockets_API)中关于WebSocket的说明。其中`双向会话`指的是客户端和服务端都能够通过WebSocket来进行数据的互相传递，即服务端可以给客户端推送数据，客户端也可以通过WebSocket来传递数据。
 
@@ -23,15 +23,15 @@
 
 - 轮询
 - 长轮询（常用）
-- SSE(Server Send Event)
+- SSE(Server-Sent Events)
 
 下面，我们对这几个都进行简单的介绍。
 
 ### 轮询
 
-轮询是最早在客户端用来模拟长连接的一种方式。他通过客户端定时想服务端发送HTTP请求来模拟客户端向服务端发送数据，而服务端的数据则是在客户端发送HTTP请求后跟随返回。
+轮询是最早在客户端用来模拟长连接的一种方式。它通过客户端定时向服务端发送HTTP请求来模拟客户端向服务端发送数据，而服务端的数据则是在客户端发送HTTP请求后跟随返回。
 
-这种方案能够让客户端的数据几乎实时的到达，但是缺点也显而易见：服务端的数据需要在客户端的请求回来后才能带回。如果HTTP请求的间隔太短，则会导致大量的网络开销；如果间隔太长，这将导致数据传递的不及时。
+这种方案能够让客户端的数据几乎实时地到达，但是缺点也显而易见：服务端的数据需要在客户端的请求回来后才能带回。如果HTTP请求的间隔太短，则会导致大量的网络开销；如果间隔太长，这将导致数据传递的不及时。
 
 ### 长轮询
 
@@ -39,13 +39,13 @@
 
 这种方案能够解决轮询中带来的服务端数据不能及时传递的问题，但是带来的网络花销大的问题仍然无法解决。
 
-### SSE(Server Send Event)
+### SSE(Server-Sent Events)
 
-SSE是一个新的协议，作用为服务端想客户端推送数据。他通过自定义的SSE协议来实现单项的数据推送。SSE的缺点是数据只能从服务端像客户端传递，而数据不能通过客户端向服务端传递。
+SSE是一个新的协议，作用为服务端向客户端推送数据。它通过自定义的SSE协议来实现单向的数据推送。SSE的缺点是数据只能从服务端向客户端传递，而数据不能通过客户端向服务端传递。
 
 ### WebSocket能够解决上述问题
 
-WebSocket能够有效的解决以下问题：
+WebSocket能够有效地解决以下问题：
 
 1. 带宽问题：WebSocket相对于HTTP来说协议头更加小，同时按需传递。
 2. 数据实时性问题：WebSocket相对于轮询和长轮询来说，能够实时传递数据，延迟更小。
@@ -57,7 +57,7 @@ WebSocket能够有效的解决以下问题：
 
 了解了为什么需要使用WebSocket，下面让我们来了解下WebSocket协议相关的内容。
 
-WebSocket协议是通过HTTP协议升级而来。只需要在HTTP协议基础上增加两次握手，即可建立WebSocket连接（如果是需要通过SSL加密，则还需要进行SSL握手过程），握手的部分详情可以见[WebSocket文档](https://tools.ietf.org/html/rfc6455#section-1.3)，下面我们简单介绍以下Header相关字段。
+WebSocket协议是通过HTTP协议升级而来。只需要在HTTP协议基础上增加一次握手（一次请求和一次响应），即可建立WebSocket连接（如果是需要通过SSL加密，则还需要进行SSL握手过程），握手的部分详情可以见[WebSocket文档](https://tools.ietf.org/html/rfc6455#section-1.3)，下面我们简单介绍一下Header相关字段。
 
 ## 请求Header
 
@@ -97,7 +97,7 @@ Sec-WebSocket-Protocol: chat
 
 - `Upgrade: websocket`：确认将HTTP连接升级至WebSocket连接。
 - `Connection: Upgrade`：确认升级HTTP连接。
-- `Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo`：服务端根据客户端的连接密钥生成的服务端密钥。
+- `Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=`：服务端根据客户端的连接密钥生成的服务端密钥。
 - `Sec-WebSocket-Protocol: chat`：选择的WebSocket协议。
 
 # WebSocket API介绍
@@ -132,7 +132,7 @@ webSocket.addEventListener('open', (event) => {
 WebSocket通过`message`事件来接收消息。
 
 ```javascript
-socket.addEventListener('message', function (event) {
+webSocket.addEventListener('message', function (event) {
     console.log('Message from server', event.data);
 });
 ```
@@ -152,7 +152,7 @@ WebSocket通过`send`方法来发送消息。
 webSocket.send(data);
 ```
 
-示例中的`data`字段，也有可能是收到消息所说的`String`、`ArrayBuffer`和`Blob`三种数据类型之一。其中，`Blob`作为一种类文件数据类型，再此不进行过多介绍。我们使用最多的就是`String`和`ArrayBuffer`。
+示例中的`data`字段，也有可能是收到消息所说的`String`、`ArrayBuffer`和`Blob`三种数据类型之一。其中，`Blob`作为一种类文件数据类型，在此不进行过多介绍。我们使用最多的就是`String`和`ArrayBuffer`。
 
 - `String`类型只需要传递一个字符串给`send`方法作为参数即可。
 - `ArrayBuffer`类型则需要传递一个ArrayBuffer对象作为参数，相关的内容也将在本系列第二篇中进行介绍。
@@ -184,7 +184,7 @@ webSocket.close();
 - 第一个参数表示关闭连接的状态号，默认为1000，表示正常关闭。
 - 第二个参数为关闭原因，是一个不长于123字节的UTF-8文本。
 
-**注：主动关闭不会触发`close`事件。**
+**注：主动关闭同样会触发`close`事件（在关闭握手完成、连接真正关闭后触发）。**
 
 # 总结
 
